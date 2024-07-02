@@ -12,7 +12,7 @@ import {
 } from 'src/app/data/matching-model'
 import { NgSelectModule } from '@ng-select/ng-select'
 import { RouterTestingModule } from '@angular/router/testing'
-import { provideHttpClientTesting } from '@angular/common/http/testing'
+import { HttpClientTestingModule } from '@angular/common/http/testing'
 import { of } from 'rxjs'
 import { TagService } from 'src/app/services/rest/tag.service'
 import {
@@ -31,7 +31,6 @@ import { PermissionsFormComponent } from '../permissions/permissions-form/permis
 import { SelectComponent } from '../select/select.component'
 import { SettingsService } from 'src/app/services/settings.service'
 import { NgxBootstrapIconsModule, allIcons } from 'ngx-bootstrap-icons'
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http'
 
 const tags: Tag[] = [
   {
@@ -75,16 +74,6 @@ describe('TagsComponent', () => {
         ColorComponent,
         CheckComponent,
       ],
-      imports: [
-        FormsModule,
-        ReactiveFormsModule,
-        NgSelectModule,
-        RouterTestingModule,
-        NgbModalModule,
-        NgbAccordionModule,
-        NgbPopoverModule,
-        NgxBootstrapIconsModule.pick(allIcons),
-      ],
       providers: [
         {
           provide: TagService,
@@ -101,8 +90,17 @@ describe('TagsComponent', () => {
               }),
           },
         },
-        provideHttpClient(withInterceptorsFromDi()),
-        provideHttpClientTesting(),
+      ],
+      imports: [
+        FormsModule,
+        ReactiveFormsModule,
+        NgSelectModule,
+        RouterTestingModule,
+        HttpClientTestingModule,
+        NgbModalModule,
+        NgbAccordionModule,
+        NgbPopoverModule,
+        NgxBootstrapIconsModule.pick(allIcons),
       ],
     }).compileComponents()
 

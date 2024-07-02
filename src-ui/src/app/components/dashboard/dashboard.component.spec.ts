@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing'
 import { NgbAlertModule } from '@ng-bootstrap/ng-bootstrap'
 import { PermissionsGuard } from 'src/app/guards/permissions.guard'
 import { DashboardComponent } from './dashboard.component'
-import { provideHttpClientTesting } from '@angular/common/http/testing'
+import { HttpClientTestingModule } from '@angular/common/http/testing'
 import { SettingsService } from 'src/app/services/settings.service'
 import { StatisticsWidgetComponent } from './widgets/statistics-widget/statistics-widget.component'
 import { PageHeaderComponent } from '../common/page-header/page-header.component'
@@ -22,7 +22,6 @@ import { SETTINGS_KEYS } from 'src/app/data/ui-settings'
 import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop'
 import { SavedView } from 'src/app/data/saved-view'
 import { NgxBootstrapIconsModule, allIcons } from 'ngx-bootstrap-icons'
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http'
 
 const saved_views = [
   {
@@ -82,13 +81,6 @@ describe('DashboardComponent', () => {
         SavedViewWidgetComponent,
         LogoComponent,
       ],
-      imports: [
-        NgbAlertModule,
-        RouterTestingModule,
-        TourNgBootstrapModule,
-        DragDropModule,
-        NgxBootstrapIconsModule.pick(allIcons),
-      ],
       providers: [
         PermissionsGuard,
         {
@@ -109,8 +101,14 @@ describe('DashboardComponent', () => {
             dashboardViews: saved_views.filter((v) => v.show_on_dashboard),
           },
         },
-        provideHttpClient(withInterceptorsFromDi()),
-        provideHttpClientTesting(),
+      ],
+      imports: [
+        NgbAlertModule,
+        HttpClientTestingModule,
+        RouterTestingModule,
+        TourNgBootstrapModule,
+        DragDropModule,
+        NgxBootstrapIconsModule.pick(allIcons),
       ],
     }).compileComponents()
 

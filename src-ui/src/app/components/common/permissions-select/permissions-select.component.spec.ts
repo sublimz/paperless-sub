@@ -14,8 +14,7 @@ import { By } from '@angular/platform-browser'
 import { NgxBootstrapIconsModule, allIcons } from 'ngx-bootstrap-icons'
 import { SettingsService } from 'src/app/services/settings.service'
 import { SETTINGS_KEYS } from 'src/app/data/ui-settings'
-import { provideHttpClientTesting } from '@angular/common/http/testing'
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http'
+import { HttpClientTestingModule } from '@angular/common/http/testing'
 
 const permissions = [
   'add_document',
@@ -37,15 +36,13 @@ describe('PermissionsSelectComponent', () => {
   beforeEach(async () => {
     TestBed.configureTestingModule({
       declarations: [PermissionsSelectComponent],
+      providers: [],
       imports: [
         FormsModule,
         ReactiveFormsModule,
         NgbModule,
         NgxBootstrapIconsModule.pick(allIcons),
-      ],
-      providers: [
-        provideHttpClient(withInterceptorsFromDi()),
-        provideHttpClientTesting(),
+        HttpClientTestingModule,
       ],
     }).compileComponents()
 

@@ -1,14 +1,12 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing'
 
 import { SplitConfirmDialogComponent } from './split-confirm-dialog.component'
-import { provideHttpClientTesting } from '@angular/common/http/testing'
+import { HttpClientTestingModule } from '@angular/common/http/testing'
 import { ReactiveFormsModule, FormsModule } from '@angular/forms'
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap'
 import { NgxBootstrapIconsModule, allIcons } from 'ngx-bootstrap-icons'
 import { DocumentService } from 'src/app/services/rest/document.service'
 import { PdfViewerModule } from 'ng2-pdf-viewer'
-import { of } from 'rxjs'
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http'
 
 describe('SplitConfirmDialogComponent', () => {
   let component: SplitConfirmDialogComponent
@@ -18,16 +16,13 @@ describe('SplitConfirmDialogComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [SplitConfirmDialogComponent],
+      providers: [NgbActiveModal],
       imports: [
+        HttpClientTestingModule,
         NgxBootstrapIconsModule.pick(allIcons),
         ReactiveFormsModule,
         FormsModule,
         PdfViewerModule,
-      ],
-      providers: [
-        NgbActiveModal,
-        provideHttpClient(withInterceptorsFromDi()),
-        provideHttpClientTesting(),
       ],
     }).compileComponents()
 
@@ -35,14 +30,6 @@ describe('SplitConfirmDialogComponent', () => {
     documentService = TestBed.inject(DocumentService)
     component = fixture.componentInstance
     fixture.detectChanges()
-  })
-
-  it('should load document on init', () => {
-    const getSpy = jest.spyOn(documentService, 'get')
-    component.documentID = 1
-    getSpy.mockReturnValue(of({ id: 1 } as any))
-    component.ngOnInit()
-    expect(documentService.get).toHaveBeenCalledWith(1)
   })
 
   it('should update pagesString when pages are added', () => {

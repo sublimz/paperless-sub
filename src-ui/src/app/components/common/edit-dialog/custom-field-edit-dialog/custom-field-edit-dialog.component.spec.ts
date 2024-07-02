@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing'
 
 import { CustomFieldEditDialogComponent } from './custom-field-edit-dialog.component'
-import { provideHttpClientTesting } from '@angular/common/http/testing'
+import { HttpClientTestingModule } from '@angular/common/http/testing'
 import { FormsModule, ReactiveFormsModule } from '@angular/forms'
 import { NgbActiveModal, NgbModule } from '@ng-bootstrap/ng-bootstrap'
 import { NgSelectModule } from '@ng-select/ng-select'
@@ -12,7 +12,6 @@ import { SettingsService } from 'src/app/services/settings.service'
 import { SelectComponent } from '../../input/select/select.component'
 import { TextComponent } from '../../input/text/text.component'
 import { EditDialogMode } from '../edit-dialog.component'
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http'
 
 describe('CustomFieldEditDialogComponent', () => {
   let component: CustomFieldEditDialogComponent
@@ -29,11 +28,13 @@ describe('CustomFieldEditDialogComponent', () => {
         TextComponent,
         SafeHtmlPipe,
       ],
-      imports: [FormsModule, ReactiveFormsModule, NgSelectModule, NgbModule],
-      providers: [
-        NgbActiveModal,
-        provideHttpClient(withInterceptorsFromDi()),
-        provideHttpClientTesting(),
+      providers: [NgbActiveModal],
+      imports: [
+        HttpClientTestingModule,
+        FormsModule,
+        ReactiveFormsModule,
+        NgSelectModule,
+        NgbModule,
       ],
     }).compileComponents()
 

@@ -1,5 +1,5 @@
 import { ViewportScroller, DatePipe } from '@angular/common'
-import { provideHttpClientTesting } from '@angular/common/http/testing'
+import { HttpClientTestingModule } from '@angular/common/http/testing'
 import { ComponentFixture, TestBed } from '@angular/core/testing'
 import { FormsModule, ReactiveFormsModule } from '@angular/forms'
 import { By } from '@angular/platform-browser'
@@ -50,7 +50,6 @@ import {
 } from 'src/app/data/system-status'
 import { DragDropSelectComponent } from '../../common/input/drag-drop-select/drag-drop-select.component'
 import { DragDropModule } from '@angular/cdk/drag-drop'
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http'
 
 const savedViews = [
   { id: 1, name: 'view1', show_in_sidebar: true, show_on_dashboard: true },
@@ -101,8 +100,10 @@ describe('SettingsComponent', () => {
         ConfirmButtonComponent,
         DragDropSelectComponent,
       ],
+      providers: [CustomDatePipe, DatePipe, PermissionsGuard],
       imports: [
         NgbModule,
+        HttpClientTestingModule,
         RouterTestingModule.withRoutes(routes),
         FormsModule,
         ReactiveFormsModule,
@@ -111,13 +112,6 @@ describe('SettingsComponent', () => {
         NgxBootstrapIconsModule.pick(allIcons),
         NgbModalModule,
         DragDropModule,
-      ],
-      providers: [
-        CustomDatePipe,
-        DatePipe,
-        PermissionsGuard,
-        provideHttpClient(withInterceptorsFromDi()),
-        provideHttpClientTesting(),
       ],
     }).compileComponents()
 

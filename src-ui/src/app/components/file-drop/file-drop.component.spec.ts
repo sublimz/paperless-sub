@@ -1,4 +1,4 @@
-import { provideHttpClientTesting } from '@angular/common/http/testing'
+import { HttpClientTestingModule } from '@angular/common/http/testing'
 import {
   ComponentFixture,
   TestBed,
@@ -15,7 +15,6 @@ import { UploadDocumentsService } from 'src/app/services/upload-documents.servic
 import { ToastsComponent } from '../common/toasts/toasts.component'
 import { FileDropComponent } from './file-drop.component'
 import { NgxFileDropEntry, NgxFileDropModule } from 'ngx-file-drop'
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http'
 
 describe('FileDropComponent', () => {
   let component: FileDropComponent
@@ -28,11 +27,8 @@ describe('FileDropComponent', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [FileDropComponent, ToastsComponent],
-      imports: [NgxFileDropModule],
-      providers: [
-        provideHttpClient(withInterceptorsFromDi()),
-        provideHttpClientTesting(),
-      ],
+      providers: [],
+      imports: [HttpClientTestingModule, NgxFileDropModule],
     }).compileComponents()
 
     permissionsService = TestBed.inject(PermissionsService)

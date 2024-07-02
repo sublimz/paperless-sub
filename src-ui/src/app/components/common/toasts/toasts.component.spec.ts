@@ -8,12 +8,11 @@ import {
 import { ToastService } from 'src/app/services/toast.service'
 import { ToastsComponent } from './toasts.component'
 import { ComponentFixture } from '@angular/core/testing'
-import { provideHttpClientTesting } from '@angular/common/http/testing'
+import { HttpClientTestingModule } from '@angular/common/http/testing'
 import { of } from 'rxjs'
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap'
 import { Clipboard } from '@angular/cdk/clipboard'
 import { NgxBootstrapIconsModule, allIcons } from 'ngx-bootstrap-icons'
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http'
 
 const toasts = [
   {
@@ -47,7 +46,11 @@ describe('ToastsComponent', () => {
   beforeEach(async () => {
     TestBed.configureTestingModule({
       declarations: [ToastsComponent],
-      imports: [NgbModule, NgxBootstrapIconsModule.pick(allIcons)],
+      imports: [
+        HttpClientTestingModule,
+        NgbModule,
+        NgxBootstrapIconsModule.pick(allIcons),
+      ],
       providers: [
         {
           provide: ToastService,
@@ -55,8 +58,6 @@ describe('ToastsComponent', () => {
             getToasts: () => of(toasts),
           },
         },
-        provideHttpClient(withInterceptorsFromDi()),
-        provideHttpClientTesting(),
       ],
     }).compileComponents()
 

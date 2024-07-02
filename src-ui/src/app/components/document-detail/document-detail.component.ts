@@ -57,7 +57,7 @@ import {
 import { User } from 'src/app/data/user'
 import { UserService } from 'src/app/services/rest/user.service'
 import { DocumentNote } from 'src/app/data/document-note'
-import { HttpClient } from '@angular/common/http'
+import { HttpClient,HttpHeaders } from '@angular/common/http'
 import { ComponentWithPermissions } from '../with-permissions/with-permissions.component'
 import { EditDialogMode } from '../common/edit-dialog/edit-dialog.component'
 import { ObjectWithId } from 'src/app/data/object-with-id'
@@ -72,6 +72,8 @@ import { DeletePagesConfirmDialogComponent } from '../common/confirm-dialog/dele
 import { HotKeyService } from 'src/app/services/hot-key.service'
 import { PDFDocumentProxy } from 'ng2-pdf-viewer'
 import { DataType } from 'src/app/data/datatype'
+import { NgxExtendedPdfViewerModule, NgxExtendedPdfViewerService } from 'ngx-extended-pdf-viewer';
+import { CookieService } from 'ngx-cookie-service';
 
 enum DocumentDetailNavIDs {
   Details = 1,
@@ -108,6 +110,8 @@ enum ZoomSetting {
   templateUrl: './document-detail.component.html',
   styleUrls: ['./document-detail.component.scss'],
 })
+
+
 export class DocumentDetailComponent
   extends ComponentWithPermissions
   implements OnInit, OnDestroy, DirtyComponent
@@ -117,6 +121,8 @@ export class DocumentDetailComponent
 
   expandOriginalMetadata = false
   expandArchivedMetadata = false
+
+  public downloaded: string | undefined;
 
   error: any
 
@@ -207,10 +213,41 @@ export class DocumentDetailComponent
     private userService: UserService,
     private customFieldsService: CustomFieldsService,
     private http: HttpClient,
-    private hotKeyService: HotKeyService
+    private cookieService: CookieService,
+    private hotKeyService: HotKeyService,
+    private ngxService: NgxExtendedPdfViewerService,
   ) {
     super()
   }
+
+ 
+  public async downloadAsBlob(): Promise<void> {
+    const blob = await this.ngxService.getCurrentDocumentAsBlob();
+    const file = new File([blob], 'gagner.pdf', { type: blob.type,lastModified: Date.now()});
+    console.log(file)
+
+    const csrfToken = this.cookieService.get('XSRF-TOKEN');
+    const headers = new Headers();
+    headers.append("Authorization", "Basic YWRtaW46YWRtaW4=");
+    headers.append("Cookie", csrfToken);
+
+    const formData = new FormData();
+    formData.append("document", file, "gagner.pdf");
+    formData.append("title", "Nouveaufichier");
+
+    fetch('http://localhost:8000/api/documents/post_document/', {
+      method: 'POST',
+      headers: headers,
+      body: formData,
+      redirect: "follow"
+    })
+    .then((response) => response.text())
+    .then((result) => console.log(result))
+    .catch((error) => console.error(error));
+      
+  }
+
+
 
   titleKeyUp(event) {
     this.titleSubject.next(event.target?.value)
@@ -773,11 +810,11 @@ export class DocumentDetailComponent
     let modal = this.modalService.open(ConfirmDialogComponent, {
       backdrop: 'static',
     })
-    modal.componentInstance.title = $localize`Confirm`
-    modal.componentInstance.messageBold = $localize`Do you really want to move the document "${this.document.title}" to the trash?`
-    modal.componentInstance.message = $localize`Documents can be restored prior to permanent deletion.`
+    modal.componentInstance.title = $localize`Confirm delete`
+    modal.componentInstance.messageBold = $localize`Do you really want to delete document "${this.document.title}"?`
+    modal.componentInstance.message = $localize`The files for this document will be deleted permanently. This operation cannot be undone.`
     modal.componentInstance.btnClass = 'btn-danger'
-    modal.componentInstance.btnCaption = $localize`Move to trash`
+    modal.componentInstance.btnCaption = $localize`Delete document`
     this.subscribeModalDelete(modal) // so can be re-subscribed if error
   }
 
@@ -812,23 +849,25 @@ export class DocumentDetailComponent
     ])
   }
 
-  reprocess() {
+  
+  
+  redoOcr() {
     let modal = this.modalService.open(ConfirmDialogComponent, {
       backdrop: 'static',
     })
-    modal.componentInstance.title = $localize`Reprocess confirm`
-    modal.componentInstance.messageBold = $localize`This operation will permanently recreate the archive file for this document.`
-    modal.componentInstance.message = $localize`The archive file will be re-generated with the current settings.`
+    modal.componentInstance.title = $localize`Redo OCR confirm`
+    modal.componentInstance.messageBold = $localize`This operation will permanently redo OCR for this document.`
+    modal.componentInstance.message = $localize`This operation cannot be undone.`
     modal.componentInstance.btnClass = 'btn-danger'
     modal.componentInstance.btnCaption = $localize`Proceed`
     modal.componentInstance.confirmClicked.subscribe(() => {
       modal.componentInstance.buttonsEnabled = false
       this.documentsService
-        .bulkEdit([this.document.id], 'reprocess', {})
+        .bulkEdit([this.document.id], 'redo_ocr', {})
         .subscribe({
           next: () => {
             this.toastService.showInfo(
-              $localize`Reprocess operation will begin in the background. Close and re-open or reload this document after the operation has completed to see new content.`
+              $localize`Redo OCR operation will begin in the background. Close and re-open or reload this document after the operation has completed to see new content.`
             )
             if (modal) {
               modal.close()
@@ -1120,7 +1159,6 @@ export class DocumentDetailComponent
         this.documentsService
           .bulkEdit([this.document.id], 'split', {
             pages: modal.componentInstance.pagesString,
-            delete_originals: modal.componentInstance.deleteOriginal,
           })
           .pipe(first(), takeUntil(this.unsubscribeNotifier))
           .subscribe({

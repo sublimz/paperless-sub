@@ -1,13 +1,12 @@
 import { TestBed } from '@angular/core/testing'
 import { TasksService } from './tasks.service'
 import {
+  HttpClientTestingModule,
   HttpTestingController,
-  provideHttpClientTesting,
 } from '@angular/common/http/testing'
 import { environment } from 'src/environments/environment'
 import { PaperlessTaskType } from '../data/paperless-task'
 import { PaperlessTaskStatus } from '../data/paperless-task'
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http'
 
 describe('TasksService', () => {
   let httpTestingController: HttpTestingController
@@ -15,12 +14,8 @@ describe('TasksService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [],
-      providers: [
-        TasksService,
-        provideHttpClient(withInterceptorsFromDi()),
-        provideHttpClientTesting(),
-      ],
+      providers: [TasksService],
+      imports: [HttpClientTestingModule],
     })
 
     httpTestingController = TestBed.inject(HttpTestingController)

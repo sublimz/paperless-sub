@@ -3,7 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing'
 import { CustomFieldsComponent } from './custom-fields.component'
 import { CustomField, CustomFieldDataType } from 'src/app/data/custom-field'
 import { CustomFieldsService } from 'src/app/services/rest/custom-fields.service'
-import { provideHttpClientTesting } from '@angular/common/http/testing'
+import { HttpClientTestingModule } from '@angular/common/http/testing'
 import { FormsModule, ReactiveFormsModule } from '@angular/forms'
 import { By } from '@angular/platform-browser'
 import {
@@ -21,7 +21,6 @@ import { ConfirmDialogComponent } from '../../common/confirm-dialog/confirm-dial
 import { PageHeaderComponent } from '../../common/page-header/page-header.component'
 import { CustomFieldEditDialogComponent } from '../../common/edit-dialog/custom-field-edit-dialog/custom-field-edit-dialog.component'
 import { NgxBootstrapIconsModule, allIcons } from 'ngx-bootstrap-icons'
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http'
 
 const fields: CustomField[] = [
   {
@@ -51,14 +50,6 @@ describe('CustomFieldsComponent', () => {
         PageHeaderComponent,
         ConfirmDialogComponent,
       ],
-      imports: [
-        NgbPaginationModule,
-        FormsModule,
-        ReactiveFormsModule,
-        NgbModalModule,
-        NgbPopoverModule,
-        NgxBootstrapIconsModule.pick(allIcons),
-      ],
       providers: [
         {
           provide: PermissionsService,
@@ -68,8 +59,15 @@ describe('CustomFieldsComponent', () => {
             currentUserOwnsObject: () => true,
           },
         },
-        provideHttpClient(withInterceptorsFromDi()),
-        provideHttpClientTesting(),
+      ],
+      imports: [
+        HttpClientTestingModule,
+        NgbPaginationModule,
+        FormsModule,
+        ReactiveFormsModule,
+        NgbModalModule,
+        NgbPopoverModule,
+        NgxBootstrapIconsModule.pick(allIcons),
       ],
     })
 

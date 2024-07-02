@@ -1,9 +1,7 @@
-import { Component, OnInit } from '@angular/core'
+import { Component } from '@angular/core'
 import { ConfirmDialogComponent } from '../confirm-dialog.component'
-import { Document } from 'src/app/data/document'
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap'
 import { DocumentService } from 'src/app/services/rest/document.service'
-import { PermissionsService } from 'src/app/services/permissions.service'
 import { PDFDocumentProxy } from 'ng2-pdf-viewer'
 
 @Component({
@@ -11,10 +9,7 @@ import { PDFDocumentProxy } from 'ng2-pdf-viewer'
   templateUrl: './split-confirm-dialog.component.html',
   styleUrl: './split-confirm-dialog.component.scss',
 })
-export class SplitConfirmDialogComponent
-  extends ConfirmDialogComponent
-  implements OnInit
-{
+export class SplitConfirmDialogComponent extends ConfirmDialogComponent {
   public get pagesString(): string {
     let pagesStr = ''
 
@@ -37,10 +32,8 @@ export class SplitConfirmDialogComponent
   private pages: Set<number> = new Set()
 
   public documentID: number
-  private document: Document
   public page: number = 1
   public totalPages: number
-  public deleteOriginal: boolean = false
 
   public get pdfSrc(): string {
     return this.documentService.getPreviewUrl(this.documentID)
@@ -48,17 +41,10 @@ export class SplitConfirmDialogComponent
 
   constructor(
     activeModal: NgbActiveModal,
-    private documentService: DocumentService,
-    private permissionService: PermissionsService
+    private documentService: DocumentService
   ) {
     super(activeModal)
     this.confirmButtonEnabled = this.pages.size > 0
-  }
-
-  ngOnInit(): void {
-    this.documentService.get(this.documentID).subscribe((r) => {
-      this.document = r
-    })
   }
 
   pdfPreviewLoaded(pdf: PDFDocumentProxy) {
@@ -76,9 +62,5 @@ export class SplitConfirmDialogComponent
     let page = Array.from(this.pages)[Math.min(i, this.pages.size - 1)]
     this.pages.delete(page)
     this.confirmButtonEnabled = this.pages.size > 0
-  }
-
-  get userOwnsDocument(): boolean {
-    return this.permissionService.currentUserOwnsObject(this.document)
   }
 }

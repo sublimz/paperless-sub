@@ -1,4 +1,4 @@
-import { provideHttpClientTesting } from '@angular/common/http/testing'
+import { HttpClientTestingModule } from '@angular/common/http/testing'
 import {
   ComponentFixture,
   TestBed,
@@ -27,7 +27,6 @@ import { WidgetFrameComponent } from '../widget-frame/widget-frame.component'
 import { UploadFileWidgetComponent } from './upload-file-widget.component'
 import { DragDropModule } from '@angular/cdk/drag-drop'
 import { NgxBootstrapIconsModule, allIcons } from 'ngx-bootstrap-icons'
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http'
 
 const FAILED_STATUSES = [new FileStatus()]
 const WORKING_STATUSES = [new FileStatus(), new FileStatus()]
@@ -60,13 +59,6 @@ describe('UploadFileWidgetComponent', () => {
         WidgetFrameComponent,
         IfPermissionsDirective,
       ],
-      imports: [
-        NgbModule,
-        RouterTestingModule.withRoutes(routes),
-        NgbAlertModule,
-        DragDropModule,
-        NgxBootstrapIconsModule.pick(allIcons),
-      ],
       providers: [
         PermissionsGuard,
         {
@@ -75,8 +67,14 @@ describe('UploadFileWidgetComponent', () => {
             currentUserCan: () => true,
           },
         },
-        provideHttpClient(withInterceptorsFromDi()),
-        provideHttpClientTesting(),
+      ],
+      imports: [
+        HttpClientTestingModule,
+        NgbModule,
+        RouterTestingModule.withRoutes(routes),
+        NgbAlertModule,
+        DragDropModule,
+        NgxBootstrapIconsModule.pick(allIcons),
       ],
     }).compileComponents()
 

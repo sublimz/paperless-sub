@@ -1,13 +1,12 @@
 import { TestBed } from '@angular/core/testing'
 import { UsernamePipe } from './username.pipe'
 import {
+  HttpClientTestingModule,
   HttpTestingController,
-  provideHttpClientTesting,
 } from '@angular/common/http/testing'
 import { environment } from 'src/environments/environment'
 import { PermissionsService } from '../services/permissions.service'
 import { UserService } from '../services/rest/user.service'
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http'
 
 describe('UsernamePipe', () => {
   let pipe: UsernamePipe
@@ -16,13 +15,8 @@ describe('UsernamePipe', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [],
-      providers: [
-        UsernamePipe,
-        PermissionsService,
-        provideHttpClient(withInterceptorsFromDi()),
-        provideHttpClientTesting(),
-      ],
+      providers: [UsernamePipe, PermissionsService],
+      imports: [HttpClientTestingModule],
     })
 
     httpTestingController = TestBed.inject(HttpTestingController)

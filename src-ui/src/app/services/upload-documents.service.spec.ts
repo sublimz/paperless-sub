@@ -1,15 +1,11 @@
 import { TestBed } from '@angular/core/testing'
 import { UploadDocumentsService } from './upload-documents.service'
 import {
+  HttpClientTestingModule,
   HttpTestingController,
-  provideHttpClientTesting,
 } from '@angular/common/http/testing'
 import { environment } from 'src/environments/environment'
-import {
-  HttpEventType,
-  provideHttpClient,
-  withInterceptorsFromDi,
-} from '@angular/common/http'
+import { HttpEventType } from '@angular/common/http'
 import {
   ConsumerStatusService,
   FileStatusPhase,
@@ -49,13 +45,8 @@ describe('UploadDocumentsService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [],
-      providers: [
-        UploadDocumentsService,
-        ConsumerStatusService,
-        provideHttpClient(withInterceptorsFromDi()),
-        provideHttpClientTesting(),
-      ],
+      providers: [UploadDocumentsService, ConsumerStatusService],
+      imports: [HttpClientTestingModule],
     })
 
     httpTestingController = TestBed.inject(HttpTestingController)

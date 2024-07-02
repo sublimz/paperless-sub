@@ -4,10 +4,9 @@ import {
   NG_VALUE_ACCESSOR,
   ReactiveFormsModule,
 } from '@angular/forms'
-import { provideHttpClientTesting } from '@angular/common/http/testing'
+import { HttpClientTestingModule } from '@angular/common/http/testing'
 import { CurrencyPipe } from '@angular/common'
 import { MonetaryComponent } from './monetary.component'
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http'
 
 describe('MonetaryComponent', () => {
   let component: MonetaryComponent
@@ -16,12 +15,8 @@ describe('MonetaryComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [MonetaryComponent],
-      imports: [FormsModule, ReactiveFormsModule],
-      providers: [
-        CurrencyPipe,
-        provideHttpClient(withInterceptorsFromDi()),
-        provideHttpClientTesting(),
-      ],
+      providers: [CurrencyPipe],
+      imports: [FormsModule, ReactiveFormsModule, HttpClientTestingModule],
     }).compileComponents()
 
     fixture = TestBed.createComponent(MonetaryComponent)

@@ -4,9 +4,8 @@ import { CustomField, CustomFieldDataType } from 'src/app/data/custom-field'
 import { DocumentService } from 'src/app/services/rest/document.service'
 import { CustomFieldDisplayComponent } from './custom-field-display.component'
 import { DisplayField, Document } from 'src/app/data/document'
-import { provideHttpClientTesting } from '@angular/common/http/testing'
+import { HttpClientTestingModule } from '@angular/common/http/testing'
 import { CustomFieldsService } from 'src/app/services/rest/custom-fields.service'
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http'
 
 const customFields: CustomField[] = [
   { id: 1, name: 'Field 1', data_type: CustomFieldDataType.String },
@@ -19,7 +18,7 @@ const document: Document = {
   custom_fields: [
     { field: 1, document: 1, created: null, value: 'Text value' },
     { field: 2, document: 1, created: null, value: 'USD100' },
-    { field: 3, document: 1, created: null, value: [1, 2, 3] },
+    { field: 3, document: 1, created: null, value: '1,2,3' },
   ],
 }
 
@@ -32,12 +31,8 @@ describe('CustomFieldDisplayComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [CustomFieldDisplayComponent],
-      imports: [],
-      providers: [
-        DocumentService,
-        provideHttpClient(withInterceptorsFromDi()),
-        provideHttpClientTesting(),
-      ],
+      providers: [DocumentService],
+      imports: [HttpClientTestingModule],
     }).compileComponents()
   })
 

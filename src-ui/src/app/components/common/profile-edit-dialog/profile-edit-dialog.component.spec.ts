@@ -14,7 +14,7 @@ import {
   NgbModalModule,
   NgbPopoverModule,
 } from '@ng-bootstrap/ng-bootstrap'
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http'
+import { HttpClientModule } from '@angular/common/http'
 import { TextComponent } from '../input/text/text.component'
 import { PasswordComponent } from '../input/password/password.component'
 import { of, throwError } from 'rxjs'
@@ -55,7 +55,9 @@ describe('ProfileEditDialogComponent', () => {
         PasswordComponent,
         ConfirmButtonComponent,
       ],
+      providers: [NgbActiveModal],
       imports: [
+        HttpClientModule,
         ReactiveFormsModule,
         FormsModule,
         NgbModalModule,
@@ -63,7 +65,6 @@ describe('ProfileEditDialogComponent', () => {
         NgxBootstrapIconsModule.pick(allIcons),
         NgbPopoverModule,
       ],
-      providers: [NgbActiveModal, provideHttpClient(withInterceptorsFromDi())],
     })
     profileService = TestBed.inject(ProfileService)
     toastService = TestBed.inject(ToastService)

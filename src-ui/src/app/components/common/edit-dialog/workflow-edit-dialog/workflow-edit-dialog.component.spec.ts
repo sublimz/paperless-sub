@@ -1,4 +1,4 @@
-import { provideHttpClientTesting } from '@angular/common/http/testing'
+import { HttpClientTestingModule } from '@angular/common/http/testing'
 import { ComponentFixture, TestBed } from '@angular/core/testing'
 import { FormsModule, ReactiveFormsModule } from '@angular/forms'
 import { NgbActiveModal, NgbModule } from '@ng-bootstrap/ng-bootstrap'
@@ -39,7 +39,6 @@ import {
 } from 'src/app/data/workflow-action'
 import { MATCHING_ALGORITHMS, MATCH_AUTO } from 'src/app/data/matching-model'
 import { ConfirmButtonComponent } from '../../confirm-button/confirm-button.component'
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http'
 
 const workflow: Workflow = {
   name: 'Workflow 1',
@@ -89,7 +88,6 @@ describe('WorkflowEditDialogComponent', () => {
         SafeHtmlPipe,
         ConfirmButtonComponent,
       ],
-      imports: [FormsModule, ReactiveFormsModule, NgSelectModule, NgbModule],
       providers: [
         NgbActiveModal,
         {
@@ -152,8 +150,13 @@ describe('WorkflowEditDialogComponent', () => {
               }),
           },
         },
-        provideHttpClient(withInterceptorsFromDi()),
-        provideHttpClientTesting(),
+      ],
+      imports: [
+        HttpClientTestingModule,
+        FormsModule,
+        ReactiveFormsModule,
+        NgSelectModule,
+        NgbModule,
       ],
     }).compileComponents()
 

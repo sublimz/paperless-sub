@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common'
-import { provideHttpClientTesting } from '@angular/common/http/testing'
+import { HttpClientTestingModule } from '@angular/common/http/testing'
 import { ComponentFixture, TestBed } from '@angular/core/testing'
 import { FormsModule, ReactiveFormsModule } from '@angular/forms'
 import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap'
@@ -10,7 +10,6 @@ import { StoragePathService } from 'src/app/services/rest/storage-path.service'
 import { PageHeaderComponent } from '../../common/page-header/page-header.component'
 import { StoragePathListComponent } from './storage-path-list.component'
 import { NgxBootstrapIconsModule, allIcons } from 'ngx-bootstrap-icons'
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http'
 
 describe('StoragePathListComponent', () => {
   let component: StoragePathListComponent
@@ -25,16 +24,13 @@ describe('StoragePathListComponent', () => {
         PageHeaderComponent,
         IfPermissionsDirective,
       ],
+      providers: [DatePipe],
       imports: [
+        HttpClientTestingModule,
         NgbPaginationModule,
         FormsModule,
         ReactiveFormsModule,
         NgxBootstrapIconsModule.pick(allIcons),
-      ],
-      providers: [
-        DatePipe,
-        provideHttpClient(withInterceptorsFromDi()),
-        provideHttpClientTesting(),
       ],
     }).compileComponents()
 

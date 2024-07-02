@@ -5,7 +5,7 @@ import {
   ReactiveFormsModule,
 } from '@angular/forms'
 import { DateComponent } from './date.component'
-import { provideHttpClientTesting } from '@angular/common/http/testing'
+import { HttpClientTestingModule } from '@angular/common/http/testing'
 import {
   NgbDateParserFormatter,
   NgbDatepickerModule,
@@ -13,7 +13,6 @@ import {
 import { RouterTestingModule } from '@angular/router/testing'
 import { LocalizedDateParserFormatter } from 'src/app/utils/ngb-date-parser-formatter'
 import { NgxBootstrapIconsModule, allIcons } from 'ngx-bootstrap-icons'
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http'
 
 describe('DateComponent', () => {
   let component: DateComponent
@@ -23,20 +22,19 @@ describe('DateComponent', () => {
   beforeEach(async () => {
     TestBed.configureTestingModule({
       declarations: [DateComponent],
-      imports: [
-        FormsModule,
-        ReactiveFormsModule,
-        NgbDatepickerModule,
-        RouterTestingModule,
-        NgxBootstrapIconsModule.pick(allIcons),
-      ],
       providers: [
         {
           provide: NgbDateParserFormatter,
           useClass: LocalizedDateParserFormatter,
         },
-        provideHttpClient(withInterceptorsFromDi()),
-        provideHttpClientTesting(),
+      ],
+      imports: [
+        FormsModule,
+        ReactiveFormsModule,
+        HttpClientTestingModule,
+        NgbDatepickerModule,
+        RouterTestingModule,
+        NgxBootstrapIconsModule.pick(allIcons),
       ],
     }).compileComponents()
 

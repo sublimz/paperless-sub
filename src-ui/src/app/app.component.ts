@@ -35,8 +35,6 @@ export class AppComponent implements OnInit, OnDestroy {
     private permissionsService: PermissionsService,
     private hotKeyService: HotKeyService
   ) {
-    let anyWindow = window as any
-    anyWindow.pdfWorkerSrc = 'assets/js/pdf.worker.min.js'
     this.settings.updateAppearanceSettings()
   }
 

@@ -1,12 +1,11 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing'
 import { DeletePagesConfirmDialogComponent } from './delete-pages-confirm-dialog.component'
-import { provideHttpClientTesting } from '@angular/common/http/testing'
+import { HttpClientTestingModule } from '@angular/common/http/testing'
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap'
 import { NgxBootstrapIconsModule, allIcons } from 'ngx-bootstrap-icons'
 import { SafeHtmlPipe } from 'src/app/pipes/safehtml.pipe'
 import { FormsModule, ReactiveFormsModule } from '@angular/forms'
 import { PdfViewerComponent } from 'ng2-pdf-viewer'
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http'
 
 describe('DeletePagesConfirmDialogComponent', () => {
   let component: DeletePagesConfirmDialogComponent
@@ -15,16 +14,12 @@ describe('DeletePagesConfirmDialogComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [DeletePagesConfirmDialogComponent, PdfViewerComponent],
+      providers: [NgbActiveModal, SafeHtmlPipe],
       imports: [
+        HttpClientTestingModule,
         NgxBootstrapIconsModule.pick(allIcons),
         FormsModule,
         ReactiveFormsModule,
-      ],
-      providers: [
-        NgbActiveModal,
-        SafeHtmlPipe,
-        provideHttpClient(withInterceptorsFromDi()),
-        provideHttpClientTesting(),
       ],
     }).compileComponents()
     fixture = TestBed.createComponent(DeletePagesConfirmDialogComponent)

@@ -1,8 +1,8 @@
 import { TestBed } from '@angular/core/testing'
 import { DocumentListViewService } from './document-list-view.service'
 import {
+  HttpClientTestingModule,
   HttpTestingController,
-  provideHttpClientTesting,
 } from '@angular/common/http/testing'
 import { environment } from 'src/environments/environment'
 import { Subscription } from 'rxjs'
@@ -24,7 +24,6 @@ import {
   DisplayField,
   DEFAULT_DISPLAY_FIELDS,
 } from '../data/document'
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http'
 
 const documents = [
   {
@@ -92,16 +91,13 @@ describe('DocumentListViewService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
+      providers: [DocumentListViewService, PermissionsGuard, SettingsService],
+      imports: [
+        HttpClientTestingModule,
+        RouterTestingModule.withRoutes(routes),
+      ],
       declarations: [ConfirmDialogComponent],
       teardown: { destroyAfterEach: true },
-      imports: [RouterTestingModule.withRoutes(routes)],
-      providers: [
-        DocumentListViewService,
-        PermissionsGuard,
-        SettingsService,
-        provideHttpClient(withInterceptorsFromDi()),
-        provideHttpClientTesting(),
-      ],
     })
 
     sessionStorage.clear()
