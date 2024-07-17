@@ -20,7 +20,7 @@ RUN set -eux \
 # Purpose: Compiles the PUBLIC frontend
 # Notes:
 #  - Does NPM stuff with Typescript and such
-FROM --platform=$BUILDPLATFORM docker.io/node:20-bookworm-slim AS compile-frontend
+FROM --platform=$BUILDPLATFORM docker.io/node:20-bookworm-slim AS compile-public-frontend
 
 COPY ./src-uipublic /src/src-uipublic
 
@@ -269,6 +269,7 @@ COPY --chown=1000:1000 ./src ./
 
 # copy frontend
 COPY --from=compile-frontend --chown=1000:1000 /src/src/documents/static/frontend/ ./documents/static/frontend/
+COPY --from=compile-frontend --chown=1000:1000 /src/src/documents/static/publicfrontend/ ./documents/static/publicfrontend/
 
 # add users, setup scripts
 # Mount the compiled frontend to expected location
