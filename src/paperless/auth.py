@@ -7,6 +7,8 @@ from django.contrib.auth.models import User
 from django.http import HttpRequest
 from django.utils.deprecation import MiddlewareMixin
 from rest_framework import authentication
+from rest_framework.authentication import BaseAuthentication
+from rest_framework.exceptions import AuthenticationFailed
 
 logger = logging.getLogger("paperless.auth")
 
@@ -70,3 +72,33 @@ class PaperlessRemoteUserAuthentication(authentication.RemoteUserAuthentication)
     """
 
     header = settings.HTTP_REMOTE_USER_HEADER_NAME
+
+
+class DefaultAuthentication(BaseAuthentication):
+    def authenticate(self, request):
+        # Vérifiez si l'utilisateur est authentifié
+        user = request.user
+        if user.is_authenticated:
+            return (user, None)
+
+        # Si aucun utilisateur n'est authentifié, utilisez l'utilisateur par défaut
+        try:
+            user = User.objects.filter(first_name="public").first()
+            return (user, None)
+        except user.DoesNotExist:
+            raise AuthenticationFailed('No default user found')
+
+class PublicAuthentication(BaseAuthentication):
+    def authenticate(self, request):
+        # Vérifier si le Referer contient 'public'
+        if 'papi' in request.path:
+            # Récupérer l'utilisateur public
+            try:
+                user = User.objects.filter(first_name="public").first()
+                return (user, None)
+            except user.DoesNotExist:
+                raise AuthenticationFailed('No public user found')
+
+        # Sinon, essayer l'authentification standard
+        else:
+            return None

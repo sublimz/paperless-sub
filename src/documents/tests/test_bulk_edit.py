@@ -422,9 +422,8 @@ class TestPDFActions(DirectoriesMixin, TestCase):
         """
         doc_ids = [self.doc1.id, self.doc2.id, self.doc3.id]
         metadata_document_id = self.doc1.id
-        user = User.objects.create(username="test_user")
 
-        result = bulk_edit.merge(doc_ids, None, False, user)
+        result = bulk_edit.merge(doc_ids)
 
         expected_filename = (
             f"{'_'.join([str(doc_id) for doc_id in doc_ids])[:100]}_merged.pdf"
@@ -526,8 +525,7 @@ class TestPDFActions(DirectoriesMixin, TestCase):
         """
         doc_ids = [self.doc2.id]
         pages = [[1, 2], [3]]
-        user = User.objects.create(username="test_user")
-        result = bulk_edit.split(doc_ids, pages, False, user)
+        result = bulk_edit.split(doc_ids, pages)
         self.assertEqual(mock_consume_file.call_count, 2)
         consume_file_args, _ = mock_consume_file.call_args
         self.assertEqual(consume_file_args[1].title, "B (split 2)")

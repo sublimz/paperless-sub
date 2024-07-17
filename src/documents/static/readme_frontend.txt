@@ -1,0 +1,1 @@
+/opt/paperless-dev2/static/frontend

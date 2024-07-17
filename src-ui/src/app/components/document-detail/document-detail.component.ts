@@ -220,6 +220,22 @@ export class DocumentDetailComponent
     super()
   }
 
+  public set editorInkOpacity(event: Event) {
+    this.ngxService.editorInkOpacity = 10;
+  }
+
+  public set editorInkThickness(event: Event) {
+    this.ngxService.editorInkThickness = 10;
+  }
+
+  public set editorHighlightColor(event: Event) {
+    this.ngxService.editorHighlightColor = '#000000';
+  }
+
+  public set editorHighlightDefaultColor(event: Event) {
+    this.ngxService.editorHighlightDefaultColor = '#000000';
+  }
+
  
   public async downloadAsBlob(): Promise<void> {
     const blob = await this.ngxService.getCurrentDocumentAsBlob();

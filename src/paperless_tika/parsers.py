@@ -102,10 +102,7 @@ class TikaDocumentParser(DocumentParser):
             }:
                 route.pdf_format(PdfAFormat.A2b)
             elif settings.OCR_OUTPUT_TYPE == OutputTypeChoices.PDF_A1:
-                self.log.warn(
-                    "Gotenberg does not support PDF/A-1a, choosing PDF/A-2b instead",
-                )
-                route.pdf_format(PdfAFormat.A2b)
+                route.pdf_format(PdfAFormat.A1a)
             elif settings.OCR_OUTPUT_TYPE == OutputTypeChoices.PDF_A3:
                 route.pdf_format(PdfAFormat.A3b)
 

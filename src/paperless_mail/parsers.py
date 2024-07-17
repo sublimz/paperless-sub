@@ -9,9 +9,7 @@ from django.conf import settings
 from django.utils.timezone import is_naive
 from django.utils.timezone import make_aware
 from gotenberg_client import GotenbergClient
-from gotenberg_client.options import MarginType
-from gotenberg_client.options import MarginUnitType
-from gotenberg_client.options import PageMarginsType
+from gotenberg_client.options import Margin
 from gotenberg_client.options import PageSize
 from gotenberg_client.options import PdfAFormat
 from humanize import naturalsize
@@ -22,7 +20,6 @@ from tika_client import TikaClient
 from documents.parsers import DocumentParser
 from documents.parsers import ParseError
 from documents.parsers import make_thumbnail_from_pdf
-from paperless.models import OutputTypeChoices
 
 
 class MailDocumentParser(DocumentParser):
@@ -33,22 +30,17 @@ class MailDocumentParser(DocumentParser):
 
     logging_name = "paperless.parsing.mail"
 
-    def _settings_to_gotenberg_pdfa(self) -> Optional[PdfAFormat]:
+    @staticmethod
+    def _settings_to_gotenberg_pdfa() -> Optional[PdfAFormat]:
         """
         Converts our requested PDF/A output into the Gotenberg API
         format
         """
-        if settings.OCR_OUTPUT_TYPE in {
-            OutputTypeChoices.PDF_A,
-            OutputTypeChoices.PDF_A2,
-        }:
+        if settings.OCR_OUTPUT_TYPE in {"pdfa", "pdfa-2"}:
             return PdfAFormat.A2b
-        elif settings.OCR_OUTPUT_TYPE == OutputTypeChoices.PDF_A1:  # pragma: no cover
-            self.log.warn(
-                "Gotenberg does not support PDF/A-1a, choosing PDF/A-2b instead",
-            )
-            return PdfAFormat.A2b
-        elif settings.OCR_OUTPUT_TYPE == OutputTypeChoices.PDF_A3:  # pragma: no cover
+        elif settings.OCR_OUTPUT_TYPE == "pdfa-1":  # pragma: no cover
+            return PdfAFormat.A1a
+        elif settings.OCR_OUTPUT_TYPE == "pdfa-3":  # pragma: no cover
             return PdfAFormat.A3b
         return None
 
@@ -337,14 +329,7 @@ class MailDocumentParser(DocumentParser):
                 response = (
                     route.index(email_html_file)
                     .resource(css_file)
-                    .margins(
-                        PageMarginsType(
-                            top=MarginType(0.1, MarginUnitType.Inches),
-                            bottom=MarginType(0.1, MarginUnitType.Inches),
-                            left=MarginType(0.1, MarginUnitType.Inches),
-                            right=MarginType(0.1, MarginUnitType.Inches),
-                        ),
-                    )
+                    .margins(Margin(top=0.1, bottom=0.1, left=0.1, right=0.1))
                     .size(PageSize(height=11.7, width=8.27))
                     .scale(1.0)
                     .run()
@@ -419,14 +404,7 @@ class MailDocumentParser(DocumentParser):
             route.index(html_clean_file)
 
             # Set page size, margins
-            route.margins(
-                PageMarginsType(
-                    top=MarginType(0.1, MarginUnitType.Inches),
-                    bottom=MarginType(0.1, MarginUnitType.Inches),
-                    left=MarginType(0.1, MarginUnitType.Inches),
-                    right=MarginType(0.1, MarginUnitType.Inches),
-                ),
-            ).size(
+            route.margins(Margin(top=0.1, bottom=0.1, left=0.1, right=0.1)).size(
                 PageSize(height=11.7, width=8.27),
             ).scale(1.0)
 
