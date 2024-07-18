@@ -270,7 +270,7 @@ COPY --chown=1000:1000 ./src ./
 # copy frontend
 COPY --from=compile-frontend --chown=1000:1000 /src/src/documents/static/frontend/ ./documents/static/frontend/
 # copy public frontend
-COPY --compile-public-frontend --chown=1000:1000 /src/src/documents/static/publicfrontend/ ./documents/static/publicfrontend/
+COPY --from=compile-public-frontend --chown=1000:1000 /src/src/documents/static/publicfrontend/ ./documents/static/publicfrontend/
 
 # add users, setup scripts
 # Mount the compiled frontend to expected location
