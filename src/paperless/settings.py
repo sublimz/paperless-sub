@@ -326,10 +326,10 @@ if DEBUG:
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
+        "paperless.auth.PublicAuthentication",
         "rest_framework.authentication.BasicAuthentication",
         "rest_framework.authentication.TokenAuthentication",
         "rest_framework.authentication.SessionAuthentication",
-        "paperless.auth.PublicAuthentication",
     ],
     "DEFAULT_VERSIONING_CLASS": "rest_framework.versioning.AcceptHeaderVersioning",
     "DEFAULT_VERSION": "1",
