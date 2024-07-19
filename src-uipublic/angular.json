@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "paperless-public": {
+    "paperless-ui": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -100,7 +100,7 @@
                   "with": "src/environments/environment.prod.ts"
                 }
               ],
-              "outputPath": "../src/documents/static/publicfrontend/",
+              "outputPath": "../static/publicfrontend/",
               "optimization": true,
               "outputHashing": "none",
               "sourceMap": false,
@@ -132,18 +132,18 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "buildTarget": "paperless-public:build:en-US"
+            "buildTarget": "paperless-ui:build:en-US"
           },
           "configurations": {
             "production": {
-              "buildTarget": "paperless-public:build:production"
+              "buildTarget": "paperless-ui:build:production"
             }
           }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "buildTarget": "paperless-public:build"
+            "buildTarget": "paperless-ui:build"
           }
         },
         "test": {
