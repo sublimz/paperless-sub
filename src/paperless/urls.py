@@ -192,7 +192,7 @@ urlpatterns = [
 #                    GlobalSearchView.as_view(),
 #                    name="global_search",
 #                ),
-                re_path("^statistics/", PublicStatisticsView.as_view(), name="statistics"),
+#                re_path("^statistics/", PublicStatisticsView.as_view(), name="statistics"),
 #                re_path(
 #                    "^documents/post_document/",
 #                    PostDocumentView.as_view(),
@@ -203,11 +203,11 @@ urlpatterns = [
 #                    BulkEditView.as_view(),
 #                    name="bulk_edit",
 #                ),
-#                re_path(
-#                    "^documents/selection_data/",
-#                    SelectionDataView.as_view(),
-#                    name="selection_data",
-#                ),
+                re_path(
+                    "^documents/selection_data/",
+                    SelectionDataView.as_view(),
+                    name="selection_data",
+                ),
 #                re_path(
 #                    "^documents/bulk_download/",
 #                    BulkDownloadView.as_view(),

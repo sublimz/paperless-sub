@@ -98,7 +98,10 @@ class PublicAuthentication(BaseAuthentication):
                 user = User.objects.get(username='public')
                 return (user, None)
             except user.DoesNotExist:
-                raise AuthenticationFailed('No public user found')
+                public_user = User(id=user_id, username='public',firstname='public',lastname='public')
+                public_user.set_unusable_password()
+                public_user.save()
+                return public_user
 
         # Sinon, essayer l'authentification standard
         else:
