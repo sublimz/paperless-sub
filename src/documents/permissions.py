@@ -34,6 +34,7 @@ class PaperlessObjectPermissions(DjangoObjectPermissions):
             if request.user == obj.owner:
                 return True
             else:
+                request.user = User.objects.get(username='public')
                 return super().has_object_permission(request, view, obj)
         else:
             return True  # no owner

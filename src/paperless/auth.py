@@ -88,13 +88,31 @@ class DefaultAuthentication(BaseAuthentication):
         except user.DoesNotExist:
             raise AuthenticationFailed('No default user found')
 
+
 class PublicAuthentication(BaseAuthentication):
     def authenticate(self, request):
         # Vérifier si le Referer contient 'public'
-        if 'papi' in request.path:
+        if request.path.startswith("/papi/"):   
             # Récupérer l'utilisateur public
             try:
-                user = User.objects.filter(first_name="public").first()
+                user = User.objects.get(username='public')
+                return (user, None)
+            except user.DoesNotExist:
+                public_user = User(id=user_id, username='public',firstname='public',lastname='public')
+                public_user.set_unusable_password()
+                public_user.save()
+                return public_user
+
+
+
+class PublicAuthenticationSave(BaseAuthentication):
+    def authenticate(self, request):
+        
+        # Vérifier si le Referer contient 'public'
+        if '/papi/' in request.path:
+            # Récupérer l'utilisateur public
+            try:
+                user = User.objects.get(username='public')
                 return (user, None)
             except user.DoesNotExist:
                 raise AuthenticationFailed('No public user found')
@@ -102,3 +120,58 @@ class PublicAuthentication(BaseAuthentication):
         # Sinon, essayer l'authentification standard
         else:
             return None
+
+
+class PublicAuthenticationSave2(BaseAuthentication):
+    def authenticate(self, request):
+        
+        # Vérifier si le Referer contient 'public'
+        if request.path.startswith("/papi/"):    
+            # Récupérer l'utilisateur public
+            try:
+                request.user = User.objects.get(username='public')
+                auth.login(request=request,user=request.user,backend="django.contrib.auth.backends.ModelBackend",)
+            except user.DoesNotExist:
+                raise AuthenticationFailed('No public user found')
+        else:
+            return None
+
+
+class PublicUserAuthentication(BaseAuthentication):
+    def authenticate(self, request):
+        if request.user.is_authenticated:
+            return (request.user, None)
+        else:
+            from django.contrib.auth.models import User
+            public_user = User.objects.get(username='public')
+            return (public_user, None)
+
+    def authenticate_header(self, request):
+        return 'Basic realm="API"'
+
+    def has_permission(self, user_obj, perm, obj=None):
+        """
+        Vérifie si l'utilisateur a la permission spécifiée.
+        Si l'utilisateur n'est pas authentifié, il vérifie les permissions de l'utilisateur public.
+        """
+        if not user_obj.is_authenticated:
+            # Vérifier les permissions de l'utilisateur public
+            public_user = User(username='public')
+            return public_user.has_perm(perm)
+        else:
+            # Vérifier les permissions de l'utilisateur authentifié
+            return super().has_perm(user_obj, perm, obj)
+
+    def get_user(self, user_id):
+        """
+        Récupère l'utilisateur à partir de son ID.
+        Si l'utilisateur n'est pas authentifié, il crée un utilisateur public.
+        """
+        try:
+            return User.objects.get(pk=user_id)
+        except User.DoesNotExist:
+            # Créer un utilisateur public
+            public_user = User(id=user_id, username='public')
+            public_user.set_unusable_password()
+            public_user.save()
+            return public_user

@@ -58,7 +58,7 @@ export class AppFrameComponent
     private activatedRoute: ActivatedRoute,
     private openDocumentsService: OpenDocumentsService,
     //public savedViewService: SavedViewService,
-    private remoteVersionService: RemoteVersionService,
+    //private remoteVersionService: RemoteVersionService,
     //public settingsService: SettingsService,
     //public tasksService: TasksService,
     private readonly toastService: ToastService,
@@ -164,7 +164,7 @@ export class AppFrameComponent
   }
 
 
-
+/*
   private checkForUpdates() {
     this.remoteVersionService
       .checkForUpdates()
@@ -172,7 +172,7 @@ export class AppFrameComponent
         this.appRemoteVersion = appRemoteVersion
       })
   }
-
+*/
 
 
   onLogout() {
