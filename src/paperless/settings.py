@@ -326,7 +326,7 @@ if DEBUG:
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        "paperless.auth.PublicAuthentication",
+#        "paperless.auth.PublicAuthentication",
         "rest_framework.authentication.BasicAuthentication",
         "rest_framework.authentication.TokenAuthentication",
         "rest_framework.authentication.SessionAuthentication",
