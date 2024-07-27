@@ -5,7 +5,7 @@
 <html lang="en" data-bs-theme="auto">
 <head>
 	<meta charset="utf-8">
-	<title>Paperless-public</title>
+	<title>Paperless-ngx</title>
 	<base href="{% url 'base' %}">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<meta name="cookie_prefix" content="{{cookie_prefix}}">
@@ -17,9 +17,10 @@
 	<link rel="apple-touch-icon" href="{% static apple_touch_icon %}">
 </head>
 <body>
-	<h1>Paperless-public</h1>
+
+	<h1>TEST</h1>
+	<script src="{% static runtime_js %}" defer></script>
+	<script src="{% static polyfills_js %}" defer></script>
+	<script src="{% static main_js %}" defer></script>
 </body>
 </html>
-
-
-

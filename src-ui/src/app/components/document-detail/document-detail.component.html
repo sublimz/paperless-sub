@@ -45,8 +45,8 @@
       <div class="d-none d-sm-inline">&nbsp;<ng-container i18n>Actions</ng-container></div>
     </button>
     <div ngbDropdownMenu aria-labelledby="actionsDropdown" class="shadow">
-      <button ngbDropdownItem (click)="redoOcr()" [disabled]="!userCanEdit">
-        <i-bs width="1em" height="1em" name="arrow-counterclockwise"></i-bs>&nbsp;<span i18n>Redo OCR</span>
+      <button ngbDropdownItem (click)="reprocess()" [disabled]="!userCanEdit">
+        <i-bs width="1em" height="1em" name="arrow-counterclockwise"></i-bs>&nbsp;<span i18n>Reprocess</span>
       </button>
 
       <button ngbDropdownItem (click)="moreLike()">
@@ -185,6 +185,16 @@
                       (removed)="removeField(fieldInstance)"
                       [horizontal]="true"
                       [error]="getCustomFieldError(i)"></pngx-input-document-link>
+                    }
+                    @case (CustomFieldDataType.Select) {
+                      <pngx-input-select formControlName="value"
+                      [title]="getCustomFieldFromInstance(fieldInstance)?.name"
+                      [itemsArray]="getCustomFieldFromInstance(fieldInstance)?.extra_data.select_options"
+                      [allowNull]="true"
+                      [horizontal]="true"
+                      [removable]="userIsOwner"
+                      (removed)="removeField(fieldInstance)"
+                      [error]="getCustomFieldError(i)"></pngx-input-select>
                     }
                   }
                 </div>
@@ -333,9 +343,6 @@
       @if (!hasNext()) {
         <button type="button" class="order-2 btn btn-sm btn-outline-primary" (click)="save(true)" i18n [disabled]="!userCanEdit || networkActive || (isDirty$ | async) !== true">Save &amp; close</button>
       }
-      @if (!hasNext()) {
-        <button type="button" class="order-2 btn btn-sm btn-outline-primary" (click)="downloadAsBlob(true)" i18n >downloadAsBlob</button>
-      }
     </ng-container>
     <button type="button" class="order-0 btn btn-sm btn-outline-secondary" (click)="discard()" i18n [disabled]="!userCanEdit || networkActive || (isDirty$ | async) !== true">Discard</button>
   </div>
@@ -354,27 +361,17 @@
       @case (ContentRenderType.PDF) {
         @if (!useNativePdfViewer) {
           <div class="preview-sticky pdf-viewer-container">
-            <ngx-extended-pdf-viewer [src]="previewUrl"
-            [authorization]="password"
-            [(page)]="previewCurrentPage"
-            [zoom-scale]="zoom"
-            [zoom]="zoom"
-            [editorFreeText]="false"
-            [useBrowserLocale]="false"
-            [showPagingButtons]="false"
-            [showRotateButton]="false"
-            [showHandToolButton]="false"
-            [showOpenFileButton]="false"
-            [showDownloadButton]="true"
-            [showDrawEditor]="false"
-            [showTextEditor]="false"
-            [showHandToolButton]="true"
-            [showPrintButton]="false"
-            [showSecondaryToolbarButton]="true"
-            [showStampEditor]="false"
-            [handTool]="false"
-            [textLayer]="true"
-            [showToolbar]="true"></ngx-extended-pdf-viewer>
+            <pdf-viewer
+              [src]="{ url: previewUrl, password: password }"
+              [original-size]="false"
+              [show-borders]="true"
+              [show-all]="true"
+              [(page)]="previewCurrentPage"
+              [zoom-scale]="previewZoomScale"
+              [zoom]="previewZoomSetting"
+              (error)="onError($event)"
+              (after-load-complete)="pdfPreviewLoaded($event)">
+            </pdf-viewer>
           </div>
         } @else {
           <object [data]="previewUrl | safeUrl" class="preview-sticky" width="100%"></object>

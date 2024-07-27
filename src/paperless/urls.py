@@ -23,7 +23,6 @@ from documents.views import CustomFieldViewSet
 from documents.views import DocumentTypeViewSet
 from documents.views import GlobalSearchView
 from documents.views import IndexView
-from documents.views import PublicIndexView
 from documents.views import LogViewSet
 from documents.views import PostDocumentView
 from documents.views import RemoteVersionView
@@ -33,7 +32,6 @@ from documents.views import SelectionDataView
 from documents.views import SharedLinkView
 from documents.views import ShareLinkViewSet
 from documents.views import StatisticsView
-from documents.views import PublicStatisticsView
 from documents.views import StoragePathViewSet
 from documents.views import SystemStatusView
 from documents.views import TagViewSet
@@ -44,6 +42,7 @@ from documents.views import UnifiedSearchViewSet
 from documents.views import WorkflowActionViewSet
 from documents.views import WorkflowTriggerViewSet
 from documents.views import WorkflowViewSet
+from documents.views import TestView
 from paperless.consumers import StatusConsumer
 from paperless.views import ApplicationConfigurationViewSet
 from paperless.views import DisconnectSocialAccountView
@@ -171,101 +170,9 @@ urlpatterns = [
             ],
         ),
     ),
-        re_path(
-        r"^papi/",
-        include(
-            [
-                re_path(
-                    "^auth/",
-                    include(
-                        ("rest_framework.urls", "rest_framework"),
-                        namespace="rest_framework",
-                    ),
-                ),
-#                re_path(
-#                    "^search/autocomplete/",
-#                    SearchAutoCompleteView.as_view(),
-#                    name="autocomplete",
-#                ),
-#                re_path(
-#                    "^search/",
-#                    GlobalSearchView.as_view(),
-#                    name="global_search",
-#                ),
-#                re_path("^statistics/", PublicStatisticsView.as_view(), name="statistics"),
-#                re_path(
-#                    "^documents/post_document/",
-#                    PostDocumentView.as_view(),
-#                    name="post_document",
-#                ),
-#                re_path(
-#                    "^documents/bulk_edit/",
-#                    BulkEditView.as_view(),
-#                    name="bulk_edit",
-#                ),
-                re_path(
-                    "^documents/selection_data/",
-                    SelectionDataView.as_view(),
-                    name="selection_data",
-                ),
-#                re_path(
-#                    "^documents/bulk_download/",
-#                    BulkDownloadView.as_view(),
-#                    name="bulk_download",
-#                ),
-#                re_path(
-#                    "^remote_version/",
-#                    RemoteVersionView.as_view(),
-#                    name="remoteversion",
-#                ),
-                re_path("^ui_settings/", UiSettingsView.as_view(), name="ui_settings"),
-#                re_path(
-#                    "^acknowledge_tasks/",
-#                    AcknowledgeTasksView.as_view(),
-#                    name="acknowledge_tasks",
-#                ),
-#                re_path(
-#                    "^mail_accounts/test/",
-#                    MailAccountTestView.as_view(),
-#                    name="mail_accounts_test",
-#                ),
-#                path("token/", views.obtain_auth_token),
-#                re_path(
-#                    "^bulk_edit_objects/",
-#                    BulkEditObjectsView.as_view(),
-#                    name="bulk_edit_objects",
-#                ),
-#                path("profile/generate_auth_token/", GenerateAuthTokenView.as_view()),
-#                path(
-#                    "profile/disconnect_social_account/",
-#                    DisconnectSocialAccountView.as_view(),
-#                ),
-#                path(
-#                    "profile/social_account_providers/",
-#                    SocialAccountProvidersView.as_view(),
-#                ),
-#                re_path(
-#                    "^profile/",
-#                    ProfileView.as_view(),
-#                    name="profile_view",
-#                ),
-#                re_path(
-#                    "^status/",
-#                    SystemStatusView.as_view(),
-#                    name="system_status",
-#                ),
-#                re_path(
-#                    "^trash/",
-#                    TrashView.as_view(),
-#                    name="trash",
-#                ),
-                *api_router.urls,
-            ],
-        ),
-    ),
     re_path(r"share/(?P<slug>\w+)/?$", SharedLinkView.as_view()),
     re_path(r"^favicon.ico$", FaviconView.as_view(), name="favicon"),
-    re_path(r"public/", PublicIndexView.as_view(), name="PublicIndexView"),
+    re_path(r"^test", TestView.as_view(), name="test"),
     re_path(r"admin/", admin.site.urls),
     re_path(
         r"^fetch/",

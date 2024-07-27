@@ -96,6 +96,7 @@ from documents.filters import CustomFieldFilterSet
 from documents.filters import DocumentFilterSet
 from documents.filters import DocumentTypeFilterSet
 from documents.filters import ObjectOwnedOrGrantedPermissionsFilter
+from documents.filters import ObjectOwnedPermissionsFilter
 from documents.filters import ShareLinkFilterSet
 from documents.filters import StoragePathFilterSet
 from documents.filters import TagFilterSet
@@ -167,6 +168,13 @@ if settings.AUDIT_LOG_ENABLED:
 
 logger = logging.getLogger("paperless.api")
 
+class TestView(TemplateView):
+    template_name = "test.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['message'] = 'Hello, world!'
+        return context
 
 class IndexView(TemplateView):
     template_name = "index.html"
@@ -209,44 +217,6 @@ class IndexView(TemplateView):
         )
         return context
 
-class PublicIndexView(TemplateView):
-    template_name = "pindex.html"
-
-    def get_frontend_language(self):
-        lang = get_language()
-        # This is here for the following reason:
-        # Django identifies languages in the form "en-us"
-        # However, angular generates locales as "en-US".
-        # this translates between these two forms.
-        if "-" in lang:
-            first = lang[: lang.index("-")]
-            second = lang[lang.index("-") + 1 :]
-            return f"{first}-{second.upper()}"
-        else:
-            return lang
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["cookie_prefix"] = settings.COOKIE_PREFIX+"public"
-        context["username"] = "public"
-        context["full_name"] = "public"
-        context["styles_css"] = f"publicfrontend/{self.get_frontend_language()}/styles.css"
-        context["runtime_js"] = f"publicfrontend/{self.get_frontend_language()}/runtime.js"
-        context["polyfills_js"] = (
-            f"publicfrontend/{self.get_frontend_language()}/polyfills.js"
-        )
-        context["main_js"] = f"publicfrontend/{self.get_frontend_language()}/main.js"
-        context["webmanifest"] = (
-            f"publicfrontend/{self.get_frontend_language()}/manifest.webmanifest"
-        )
-        context["apple_touch_icon"] = (
-            f"publicfrontend/{self.get_frontend_language()}/apple-touch-icon.png"
-        )
-        return context
-
-
-
-
 
 class PassUserMixin(GenericAPIView):
     """
@@ -269,10 +239,11 @@ class PermissionsAwareDocumentCountMixin(PassUserMixin):
 
     def get_queryset(self):
         filter = (
-            None
+            Q(documents__deleted_at__isnull=True)
             if self.request.user is None or self.request.user.is_superuser
             else (
                 Q(
+                    documents__deleted_at__isnull=True,
                     documents__id__in=get_objects_for_user_owner_aware(
                         self.request.user,
                         "documents.view_document",
@@ -997,6 +968,11 @@ class BulkEditView(PassUserMixin):
         method = serializer.validated_data.get("method")
         parameters = serializer.validated_data.get("parameters")
         documents = serializer.validated_data.get("documents")
+        if method in [
+            bulk_edit.split,
+            bulk_edit.merge,
+        ]:
+            parameters["user"] = user
 
         if not user.is_superuser:
             document_objs = Document.objects.select_related("owner").filter(
@@ -1449,13 +1425,11 @@ class StatisticsView(APIView):
 
         documents_total = documents.count()
 
-        inbox_tag = tags.filter(is_inbox_tag=True)
+        inbox_tags = tags.filter(is_inbox_tag=True)
 
         documents_inbox = (
-            documents.filter(tags__is_inbox_tag=True, tags__id__in=tags)
-            .distinct()
-            .count()
-            if inbox_tag.exists()
+            documents.filter(tags__id__in=inbox_tags).distinct().count()
+            if inbox_tags.exists()
             else None
         )
 
@@ -1485,109 +1459,12 @@ class StatisticsView(APIView):
             {
                 "documents_total": documents_total,
                 "documents_inbox": documents_inbox,
-                "inbox_tag": inbox_tag.first().pk if inbox_tag.exists() else None,
-                "document_file_type_counts": document_file_type_counts,
-                "character_count": character_count,
-                "tag_count": len(tags),
-                "correspondent_count": correspondent_count,
-                "document_type_count": document_type_count,
-                "storage_path_count": storage_path_count,
-                "current_asn": current_asn,
-            },
-        )
-
-class PublicStatisticsView(APIView):
-#    permission_classes = (IsAuthenticated,)
-
-    def get(self, request, format=None):
-        #user = request.user if request.user is not None else None
-        user = User.objects.filter(first_name="public").first() 
-
-        documents = (
-            (
-                Document.objects.all()
-                if user is None
-                else get_objects_for_user_owner_aware(
-                    user,
-                    "documents.view_document",
-                    Document,
-                )
-            )
-            .only("mime_type", "content")
-            .prefetch_related("tags")
-        )
-        tags = (
-            Tag.objects.all()
-            if user is None
-            else get_objects_for_user_owner_aware(user, "documents.view_tag", Tag)
-        )
-        correspondent_count = (
-            Correspondent.objects.count()
-            if user is None
-            else get_objects_for_user_owner_aware(
-                user,
-                "documents.view_correspondent",
-                Correspondent,
-            ).count()
-        )
-        document_type_count = (
-            DocumentType.objects.count()
-            if user is None
-            else get_objects_for_user_owner_aware(
-                user,
-                "documents.view_documenttype",
-                DocumentType,
-            ).count()
-        )
-        storage_path_count = (
-            StoragePath.objects.count()
-            if user is None
-            else get_objects_for_user_owner_aware(
-                user,
-                "documents.view_storagepath",
-                StoragePath,
-            ).count()
-        )
-
-        documents_total = documents.count()
-
-        inbox_tag = tags.filter(is_inbox_tag=True)
-
-        documents_inbox = (
-            documents.filter(tags__is_inbox_tag=True, tags__id__in=tags)
-            .distinct()
-            .count()
-            if inbox_tag.exists()
-            else None
-        )
-
-        document_file_type_counts = (
-            documents.values("mime_type")
-            .annotate(mime_type_count=Count("mime_type"))
-            .order_by("-mime_type_count")
-            if documents_total > 0
-            else []
-        )
-
-        character_count = (
-            documents.annotate(
-                characters=Length("content"),
-            )
-            .aggregate(Sum("characters"))
-            .get("characters__sum")
-        )
-
-        current_asn = Document.objects.aggregate(
-            Max("archive_serial_number", default=0),
-        ).get(
-            "archive_serial_number__max",
-        )
-
-        return Response(
-            {
-                "documents_total": documents_total,
-                "documents_inbox": documents_inbox,
-                "inbox_tag": inbox_tag.first().pk if inbox_tag.exists() else None,
+                "inbox_tag": inbox_tags.first().pk
+                if inbox_tags.exists()
+                else None,  # backwards compatibility
+                "inbox_tags": [tag.pk for tag in inbox_tags]
+                if inbox_tags.exists()
+                else None,
                 "document_file_type_counts": document_file_type_counts,
                 "character_count": character_count,
                 "tag_count": len(tags),
@@ -2199,7 +2076,7 @@ class SystemStatusView(PassUserMixin):
 class TrashView(ListModelMixin, PassUserMixin):
     permission_classes = (IsAuthenticated,)
     serializer_class = TrashSerializer
-    filter_backends = (ObjectOwnedOrGrantedPermissionsFilter,)
+    filter_backends = (ObjectOwnedPermissionsFilter,)
     pagination_class = StandardPagination
 
     model = Document
@@ -2218,7 +2095,7 @@ class TrashView(ListModelMixin, PassUserMixin):
         docs = (
             Document.global_objects.filter(id__in=doc_ids)
             if doc_ids is not None
-            else Document.deleted_objects.all()
+            else self.filter_queryset(self.get_queryset()).all()
         )
         for doc in docs:
             if not has_perms_owner_aware(request.user, "delete_document", doc):
