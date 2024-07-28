@@ -7,7 +7,11 @@ import {
   NgbDateParserFormatter,
   NgbModule,
 } from '@ng-bootstrap/ng-bootstrap'
-import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http'
+import {
+  HTTP_INTERCEPTORS,
+  provideHttpClient,
+  withInterceptorsFromDi,
+} from '@angular/common/http'
 import { DocumentListComponent } from './components/document-list/document-list.component'
 import { DocumentDetailComponent } from './components/document-detail/document-detail.component'
 import { DashboardComponent } from './components/dashboard/dashboard.component'
@@ -115,7 +119,6 @@ import { NgxBootstrapIconsModule } from 'ngx-bootstrap-icons'
 import { ConfirmButtonComponent } from './components/common/confirm-button/confirm-button.component'
 import { MonetaryComponent } from './components/common/input/monetary/monetary.component'
 import { SystemStatusDialogComponent } from './components/common/system-status-dialog/system-status-dialog.component'
-import { NgxFilesizeModule } from 'ngx-filesize'
 import { RotateConfirmDialogComponent } from './components/common/confirm-dialog/rotate-confirm-dialog/rotate-confirm-dialog.component'
 import { MergeConfirmDialogComponent } from './components/common/confirm-dialog/merge-confirm-dialog/merge-confirm-dialog.component'
 import { SplitConfirmDialogComponent } from './components/common/confirm-dialog/split-confirm-dialog/split-confirm-dialog.component'
@@ -125,7 +128,7 @@ import { CustomFieldDisplayComponent } from './components/common/custom-field-di
 import { GlobalSearchComponent } from './components/app-frame/global-search/global-search.component'
 import { HotkeyDialogComponent } from './components/common/hotkey-dialog/hotkey-dialog.component'
 import { DeletePagesConfirmDialogComponent } from './components/common/confirm-dialog/delete-pages-confirm-dialog/delete-pages-confirm-dialog.component'
-import { NgxExtendedPdfViewerModule } from 'ngx-extended-pdf-viewer';
+import { TrashComponent } from './components/admin/trash/trash.component'
 import {
   airplane,
   archive,
@@ -357,8 +360,7 @@ import localeSr from '@angular/common/locales/sr'
 import localeSv from '@angular/common/locales/sv'
 import localeTr from '@angular/common/locales/tr'
 import localeUk from '@angular/common/locales/uk'
-import localeZh from '@angular/common/locales/zh';
-import { ExamplePdfViewerComponent } from './example-pdf-viewer/example-pdf-viewer.component'
+import localeZh from '@angular/common/locales/zh'
 
 registerLocaleData(localeAf)
 registerLocaleData(localeAr)
@@ -499,13 +501,13 @@ function initializeApp(settings: SettingsService) {
     GlobalSearchComponent,
     HotkeyDialogComponent,
     DeletePagesConfirmDialogComponent,
-    ExamplePdfViewerComponent,
+    TrashComponent,
   ],
+  bootstrap: [AppComponent],
   imports: [
     BrowserModule,
     AppRoutingModule,
     NgbModule,
-    HttpClientModule,
     FormsModule,
     ReactiveFormsModule,
     PdfViewerModule,
@@ -515,8 +517,6 @@ function initializeApp(settings: SettingsService) {
     TourNgBootstrapModule,
     DragDropModule,
     NgxBootstrapIconsModule.pick(icons),
-    NgxFilesizeModule,
-    NgxExtendedPdfViewerModule,
   ],
   providers: [
     {
@@ -545,7 +545,7 @@ function initializeApp(settings: SettingsService) {
     DirtyDocGuard,
     DirtySavedViewGuard,
     UsernamePipe,
+    provideHttpClient(withInterceptorsFromDi()),
   ],
-  bootstrap: [AppComponent],
 })
 export class AppModule {}

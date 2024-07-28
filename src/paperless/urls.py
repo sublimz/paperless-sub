@@ -14,6 +14,7 @@ from django.views.static import serve
 from rest_framework.authtoken import views
 from rest_framework.routers import DefaultRouter
 
+from documents.views import PublicIndexView
 from documents.views import AcknowledgeTasksView
 from documents.views import BulkDownloadView
 from documents.views import BulkEditObjectsView
@@ -42,7 +43,6 @@ from documents.views import UnifiedSearchViewSet
 from documents.views import WorkflowActionViewSet
 from documents.views import WorkflowTriggerViewSet
 from documents.views import WorkflowViewSet
-from documents.views import TestView
 from paperless.consumers import StatusConsumer
 from paperless.views import ApplicationConfigurationViewSet
 from paperless.views import DisconnectSocialAccountView
@@ -172,7 +172,7 @@ urlpatterns = [
     ),
     re_path(r"share/(?P<slug>\w+)/?$", SharedLinkView.as_view()),
     re_path(r"^favicon.ico$", FaviconView.as_view(), name="favicon"),
-    re_path(r"^test", TestView.as_view(), name="test"),
+    re_path(r"public/", PublicIndexView.as_view(), name="PublicIndexView"),
     re_path(r"admin/", admin.site.urls),
     re_path(
         r"^fetch/",

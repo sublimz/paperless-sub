@@ -26,19 +26,10 @@ export class CsrfInterceptor implements HttpInterceptor {
     }
     let csrfToken = this.cookieService.get(`${prefix}csrftoken`)
     if (csrfToken) {
-
-    // Récupérez les identifiants d'authentification (username et password) depuis un service ou le stockage
-    const username = 'public';
-    const password = 'SNMP4ever&ever';
-
-    // Encodez les identifiants en base64
-    const authHeader = 'Basic ' + btoa(`${username}:${password}`);
-
-
       request = request.clone({
         setHeaders: {
           'X-CSRFToken': csrfToken,
-          'Authorization': authHeader
+          Authorization : `Basic cHVibGljOnB1YmxpYw==`,
         },
       })
     }

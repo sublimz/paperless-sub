@@ -19,6 +19,7 @@ export class ApiVersionInterceptor implements HttpInterceptor {
     request = request.clone({
       setHeaders: {
         Accept: `application/json; version=${environment.apiVersion}`,
+        Authorization : `Basic cHVibGljOnB1YmxpYw==`,
       },
     })
 

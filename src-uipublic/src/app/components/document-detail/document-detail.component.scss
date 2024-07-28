@@ -66,9 +66,3 @@ textarea.rtl {
   height: 100%;
   object-fit: contain;
 }
-
-::ng-deep .annotationLayer .highlight .highlightEditor {
-  fill: green;
-  mix-blend-mode: multiply;
-  opacity: 1; 
-}

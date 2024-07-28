@@ -57,10 +57,10 @@ export class AppFrameComponent
     public router: Router,
     private activatedRoute: ActivatedRoute,
     private openDocumentsService: OpenDocumentsService,
-    //public savedViewService: SavedViewService,
-    //private remoteVersionService: RemoteVersionService,
-    //public settingsService: SettingsService,
-    //public tasksService: TasksService,
+    public savedViewService: SavedViewService,
+    private remoteVersionService: RemoteVersionService,
+    public settingsService: SettingsService,
+    public tasksService: TasksService,
     private readonly toastService: ToastService,
     private modalService: NgbModal,
     public permissionsService: PermissionsService,
@@ -68,10 +68,21 @@ export class AppFrameComponent
   ) {
     super()
 
+    if (
+      permissionsService.currentUserCan(
+        PermissionAction.View,
+        PermissionType.SavedView
+      )
+    ) {
+      this.savedViewService.initialize()
+    }
   }
 
   ngOnInit(): void {
-
+    if (this.settingsService.get(SETTINGS_KEYS.UPDATE_CHECKING_ENABLED)) {
+      this.checkForUpdates()
+    }
+    this.tasksService.reload()
 
     this.djangoMessagesService.get().forEach((message) => {
       switch (message.level) {
@@ -90,16 +101,34 @@ export class AppFrameComponent
 
   toggleSlimSidebar(): void {
     this.slimSidebarAnimating = true
+    this.slimSidebarEnabled = !this.slimSidebarEnabled
+    setTimeout(() => {
+      this.slimSidebarAnimating = false
+    }, 200) // slightly longer than css animation for slim sidebar
   }
 
   get customAppTitle(): string {
-    return "paperless-ngx"
+    return this.settingsService.get(SETTINGS_KEYS.APP_TITLE)
   }
 
   get slimSidebarEnabled(): boolean {
-    return true
+    return this.settingsService.get(SETTINGS_KEYS.SLIM_SIDEBAR)
   }
 
+  set slimSidebarEnabled(enabled: boolean) {
+    this.settingsService.set(SETTINGS_KEYS.SLIM_SIDEBAR, enabled)
+    this.settingsService
+      .storeSettings()
+      .pipe(first())
+      .subscribe({
+        error: (error) => {
+          this.toastService.showError(
+            $localize`An error occurred while saving settings.`
+          )
+          console.warn(error)
+        },
+      })
+  }
 
   closeMenu() {
     this.isMenuCollapsed = true
@@ -163,8 +192,28 @@ export class AppFrameComponent
       })
   }
 
+  onDragStart(event: CdkDragStart) {
+    this.settingsService.globalDropzoneEnabled = false
+  }
 
-/*
+  onDragEnd(event: CdkDragEnd) {
+    this.settingsService.globalDropzoneEnabled = true
+  }
+
+  onDrop(event: CdkDragDrop<SavedView[]>) {
+    const sidebarViews = this.savedViewService.sidebarViews.concat([])
+    moveItemInArray(sidebarViews, event.previousIndex, event.currentIndex)
+
+    this.settingsService.updateSidebarViewsSort(sidebarViews).subscribe({
+      next: () => {
+        this.toastService.showInfo($localize`Sidebar views updated`)
+      },
+      error: (e) => {
+        this.toastService.showError($localize`Error updating sidebar views`, e)
+      },
+    })
+  }
+
   private checkForUpdates() {
     this.remoteVersionService
       .checkForUpdates()
@@ -172,8 +221,24 @@ export class AppFrameComponent
         this.appRemoteVersion = appRemoteVersion
       })
   }
-*/
 
+  setUpdateChecking(enable: boolean) {
+    this.settingsService.set(SETTINGS_KEYS.UPDATE_CHECKING_ENABLED, enable)
+    this.settingsService
+      .storeSettings()
+      .pipe(first())
+      .subscribe({
+        error: (error) => {
+          this.toastService.showError(
+            $localize`An error occurred while saving update checking settings.`
+          )
+          console.warn(error)
+        },
+      })
+    if (enable) {
+      this.checkForUpdates()
+    }
+  }
 
   onLogout() {
     this.openDocumentsService.closeAll()

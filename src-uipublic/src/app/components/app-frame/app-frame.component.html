@@ -6,7 +6,7 @@
   </button>
   <a class="navbar-brand d-flex align-items-center me-0 px-3 py-3 order-sm-0"
     [ngClass]="{ 'slim': slimSidebarEnabled, 'col-auto col-md-3 col-lg-2 col-xxxl-1' : !slimSidebarEnabled, 'py-3' : !customAppTitle?.length || slimSidebarEnabled, 'py-2': customAppTitle?.length }"
-    routerLink="/documents"
+    routerLink="/dashboard"
     tourAnchor="tour.intro">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 198.43 238.91" width="1em" height="1.5em" fill="currentColor">
       <path
@@ -17,20 +17,18 @@
       @if (customAppTitle?.length) {
         <div class="d-flex flex-column align-items-start">
           <span class="title">{{customAppTitle}}</span>
-          <span class="byline text-uppercase font-monospace" i18n>by Paperless-public</span>
+          <span class="byline text-uppercase font-monospace" i18n>by Paperless-ngx</span>
         </div>
       } @else {
-        Paperless-public
+        Paperless-ngx
       }
     </div>
   </a>
-  <!--
   <div class="search-container flex-grow-1 py-2 pb-3 pb-sm-2 px-3 ps-md-4 me-sm-auto order-3 order-sm-1">
     <div class="col-12 col-md-7">
       <pngx-global-search></pngx-global-search>
     </div>
   </div>
-  
   <ul ngbNav class="order-sm-3">
     <li ngbDropdown class="nav-item dropdown">
       <button class="btn border-0" id="userDropdown" ngbDropdownToggle>
@@ -62,7 +60,6 @@
       </div>
     </li>
   </ul>
-  -->
 </nav>
 
 <div class="container-fluid">
@@ -79,7 +76,6 @@
       </button>
       <div class="sidebar-sticky pt-3 d-flex flex-column justify-space-around">
         <ul class="nav flex-column">
-          <!--
           <li class="nav-item app-link">
             <a class="nav-link" routerLink="dashboard" routerLinkActive="active" (click)="closeMenu()"
               ngbPopover="Dashboard" i18n-ngbPopover [disablePopover]="!slimSidebarEnabled" placement="end"
@@ -87,7 +83,6 @@
               <i-bs class="me-1" name="house"></i-bs><span>&nbsp;<ng-container i18n>Dashboard</ng-container></span>
             </a>
           </li>
-          -->
           <li class="nav-item app-link" *pngxIfPermissions="{ action: PermissionAction.View, type: PermissionType.Document }">
             <a class="nav-link" routerLink="documents" routerLinkActive="active" (click)="closeMenu()"
               ngbPopover="Documents" i18n-ngbPopover [disablePopover]="!slimSidebarEnabled" placement="end"
@@ -97,7 +92,6 @@
           </li>
         </ul>
 
-        <!--
         <div class="nav-group mt-3 mb-1" *pngxIfPermissions="{ action: PermissionAction.View, type: PermissionType.SavedView }">
           @if (savedViewService.loading || savedViewService.sidebarViews?.length > 0) {
             <h6 class="sidebar-heading px-3 text-muted">
@@ -107,7 +101,6 @@
               }
             </h6>
           }
-          
           <ul class="nav flex-column mb-2" cdkDropList (cdkDropListDropped)="onDrop($event)">
             @for (view of savedViewService.sidebarViews; track view.id) {
               <li class="nav-item w-100 app-link" cdkDrag [cdkDragDisabled]="!settingsService.organizingSidebarSavedViews"
@@ -127,9 +120,7 @@
               </li>
             }
           </ul>
-         
         </div>
-        -->
 
         <div class="nav-group mt-3 mb-1" *pngxIfPermissions="{ action: PermissionAction.View, type: PermissionType.Document }">
           @if (openDocuments.length > 0) {
@@ -176,7 +167,6 @@
                 <i-bs class="me-1" name="person"></i-bs><span>&nbsp;<ng-container i18n>Correspondents</ng-container></span>
               </a>
             </li>
-            <!--
             <li class="nav-item app-link" *pngxIfPermissions="{ action: PermissionAction.View, type: PermissionType.Tag }"
               tourAnchor="tour.tags">
               <a class="nav-link" routerLink="tags" routerLinkActive="active" (click)="closeMenu()" ngbPopover="Tags"
@@ -224,7 +214,6 @@
                 <i-bs class="me-1" name="envelope"></i-bs><span>&nbsp;<ng-container i18n>Mail</ng-container></span>
               </a>
             </li>
-            -->
           </ul>
         </div>
 
@@ -233,7 +222,6 @@
             <span i18n>Administration</span>
           </h6>
           <ul class="nav flex-column mb-2">
-            <!--
             <li class="nav-item app-link" *pngxIfPermissions="{ action: PermissionAction.Change, type: PermissionType.UISettings }"
               tourAnchor="tour.settings">
               <a class="nav-link" routerLink="settings" routerLinkActive="active" (click)="closeMenu()"
@@ -256,7 +244,6 @@
                 <i-bs class="me-1" name="people"></i-bs><span>&nbsp;<ng-container i18n>Users & Groups</ng-container></span>
               </a>
             </li>
-            
             <li class="nav-item app-link"
               *pngxIfPermissions="{ action: PermissionAction.View, type: PermissionType.PaperlessTask }"
               tourAnchor="tour.file-tasks">
@@ -280,6 +267,13 @@
                 </a>
               </li>
             }
+            <li class="nav-item app-link" *pngxIfPermissions="{ action: PermissionAction.Delete, type: PermissionType.Document }">
+              <a class="nav-link" routerLink="trash" routerLinkActive="active" (click)="closeMenu()" ngbPopover="Trash"
+                i18n-ngbPopover [disablePopover]="!slimSidebarEnabled" placement="end" container="body"
+                triggers="mouseenter:mouseleave" popoverClass="popover-slim">
+                <i-bs class="me-1" name="trash"></i-bs><span>&nbsp;<ng-container i18n>Trash</ng-container></span>
+              </a>
+            </li>
             <li class="nav-item mt-2" tourAnchor="tour.outro">
               <a class="px-3 py-2 text-muted small d-flex align-items-center flex-wrap text-decoration-none"
                 target="_blank" rel="noopener noreferrer" href="https://docs.paperless-ngx.com" ngbPopover="Documentation"
@@ -341,7 +335,6 @@
                 }
               </div>
             </li>
-            -->
           </ul>
         </div>
       </div>
