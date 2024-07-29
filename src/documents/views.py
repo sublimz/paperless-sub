@@ -168,40 +168,6 @@ if settings.AUDIT_LOG_ENABLED:
 
 logger = logging.getLogger("paperless.api")
 
-class PublicIndexView(TemplateView):
-    template_name = "pindex.html"
-
-    def get_frontend_language(self):
-        lang = get_language()
-        # This is here for the following reason:
-        # Django identifies languages in the form "en-us"
-        # However, angular generates locales as "en-US".
-        # this translates between these two forms.
-        if "-" in lang:
-            first = lang[: lang.index("-")]
-            second = lang[lang.index("-") + 1 :]
-            return f"{first}-{second.upper()}"
-        else:
-            return lang
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["cookie_prefix"] = settings.COOKIE_PREFIX
-        context["username"] = "public"
-        context["full_name"] = "public"
-        context["styles_css"] = f"publicfrontend/{self.get_frontend_language()}/styles.css"
-        context["runtime_js"] = f"publicfrontend/{self.get_frontend_language()}/runtime.js"
-        context["polyfills_js"] = (
-            f"publicfrontend/{self.get_frontend_language()}/polyfills.js"
-        )
-        context["main_js"] = f"publicfrontend/{self.get_frontend_language()}/main.js"
-        context["webmanifest"] = (
-            f"publicfrontend/{self.get_frontend_language()}/manifest.webmanifest"
-        )
-        context["apple_touch_icon"] = (
-            f"publicfrontend/{self.get_frontend_language()}/apple-touch-icon.png"
-        )
-        return context
 
 class IndexView(TemplateView):
     template_name = "index.html"

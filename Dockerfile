@@ -13,24 +13,18 @@ WORKDIR /src/src-ui
 RUN set -eux \
   && npm update npm -g \
   && npm ci
+
+ARG PNGX_TAG_VERSION=
+# Add the tag to the environment file if its a tagged dev build
+RUN set -eux && \
+case "${PNGX_TAG_VERSION}" in \
+  dev|fix*|feature*) \
+    sed -i -E "s/version: '([0-9\.]+)'/version: '\1 #${PNGX_TAG_VERSION}'/g" /src/src-ui/src/environments/environment.prod.ts \
+    ;; \
+esac
+
 RUN set -eux \
   && ./node_modules/.bin/ng build --configuration production
-
-# Stage: compile PUBLIC frontend
-# Purpose: Compiles the PUBLIC frontend
-# Notes:
-#  - Does NPM stuff with Typescript and such
-FROM --platform=$BUILDPLATFORM docker.io/node:20-bookworm-slim AS compile-public-frontend
-
-COPY ./src-uipublic /src/src-uipublic
-
-WORKDIR /src/src-uipublic
-RUN set -eux \
-  && npm update npm -g \
-  && npm ci
-RUN set -eux \
-  && ./node_modules/.bin/ng build --configuration production
-
 
 # Stage: pipenv-base
 # Purpose: Generates a requirements.txt file for building
@@ -239,11 +233,11 @@ RUN --mount=type=cache,target=/root/.cache/pip/,id=pip-cache \
     && python3 -m pip install --no-cache-dir --upgrade wheel \
   && echo "Installing Python requirements" \
     && curl --fail --silent --show-error --location \
-    --output psycopg_c-3.1.19-cp311-cp311-linux_x86_64.whl \
-    https://github.com/paperless-ngx/builder/releases/download/psycopg-3.1.19/psycopg_c-3.1.19-cp311-cp311-linux_x86_64.whl \
+    --output psycopg_c-3.2.1-cp311-cp311-linux_x86_64.whl \
+    https://github.com/paperless-ngx/builder/releases/download/psycopg-3.2.1/psycopg_c-3.2.1-cp311-cp311-linux_x86_64.whl \
     && curl --fail --silent --show-error --location \
-    --output psycopg_c-3.1.19-cp311-cp311-linux_aarch64.whl  \
-    https://github.com/paperless-ngx/builder/releases/download/psycopg-3.1.19/psycopg_c-3.1.19-cp311-cp311-linux_aarch64.whl \
+    --output psycopg_c-3.2.1-cp311-cp311-linux_aarch64.whl  \
+    https://github.com/paperless-ngx/builder/releases/download/psycopg-3.2.1/psycopg_c-3.2.1-cp311-cp311-linux_aarch64.whl \
     && python3 -m pip install --default-timeout=1000 --find-links . --requirement requirements.txt \
   && echo "Patching whitenoise for compression speedup" \
     && curl --fail --silent --show-error --location --output 484.patch https://github.com/evansd/whitenoise/pull/484.patch \
@@ -269,8 +263,6 @@ COPY --chown=1000:1000 ./src ./
 
 # copy frontend
 COPY --from=compile-frontend --chown=1000:1000 /src/src/documents/static/frontend/ ./documents/static/frontend/
-# copy public frontend
-COPY --from=compile-public-frontend --chown=1000:1000 /src/src/documents/static/publicfrontend/ ./documents/static/publicfrontend/
 
 # add users, setup scripts
 # Mount the compiled frontend to expected location

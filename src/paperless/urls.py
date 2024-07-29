@@ -14,7 +14,6 @@ from django.views.static import serve
 from rest_framework.authtoken import views
 from rest_framework.routers import DefaultRouter
 
-from documents.views import PublicIndexView
 from documents.views import AcknowledgeTasksView
 from documents.views import BulkDownloadView
 from documents.views import BulkEditObjectsView
@@ -172,7 +171,6 @@ urlpatterns = [
     ),
     re_path(r"share/(?P<slug>\w+)/?$", SharedLinkView.as_view()),
     re_path(r"^favicon.ico$", FaviconView.as_view(), name="favicon"),
-    re_path(r"public/", PublicIndexView.as_view(), name="PublicIndexView"),
     re_path(r"admin/", admin.site.urls),
     re_path(
         r"^fetch/",
