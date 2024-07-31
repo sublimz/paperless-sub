@@ -74,6 +74,7 @@ import { PDFDocumentProxy } from 'ng2-pdf-viewer'
 import { DataType } from 'src/app/data/datatype'
 import { NgxExtendedPdfViewerModule, NgxExtendedPdfViewerService } from 'ngx-extended-pdf-viewer';
 import { CookieService } from 'ngx-cookie-service';
+import { environment } from 'src/environments/environment';
 
 enum DocumentDetailNavIDs {
   Details = 1,
@@ -218,6 +219,7 @@ export class DocumentDetailComponent
 
   // Fonction pour envoyer la version cliente du pdf dans un nouveau via l'api
 
+
   public async downloadAsBlob(): Promise<void> {
     const blob = await this.ngxService.getCurrentDocumentAsBlob();
     const file = new File([blob], 'gagner.pdf', { type: blob.type,lastModified: Date.now()});
@@ -225,14 +227,14 @@ export class DocumentDetailComponent
 
     const csrfToken = this.cookieService.get('XSRF-TOKEN');
     const headers = new Headers();
-    //headers.append("Authorization", "Basic YWRtaW46YWRtaW4=");
+    headers.append("Authorization", "Basic YWRtaW46YWRtaW4=");
     headers.append("Cookie", csrfToken);
 
     const formData = new FormData();
     formData.append("document", file, "gagner.pdf");
     formData.append("title", "Nouveaufichier");
 
-    fetch('http://localhost:8000/api/documents/post_document/', {
+    fetch(environment.apiBaseUrl+'/documents/post_document/', {
       method: 'POST',
       headers: headers,
       body: formData,
