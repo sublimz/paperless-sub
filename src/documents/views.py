@@ -168,6 +168,9 @@ if settings.AUDIT_LOG_ENABLED:
 
 logger = logging.getLogger("paperless.api")
 
+#################################################
+# Vue pour l'acces public
+#################################################
 class PublicIndexView(TemplateView):
     template_name = "pindex.html"
 
@@ -208,7 +211,7 @@ class PublicIndexView(TemplateView):
             f"publicfrontend/{self.get_frontend_language()}/apple-touch-icon.png"
         )
         return context
-
+####################################
 
 class IndexView(TemplateView):
     template_name = "index.html"
