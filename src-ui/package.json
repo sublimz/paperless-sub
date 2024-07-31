@@ -31,6 +31,7 @@
     "ngx-bootstrap-icons": "^1.9.3",
     "ngx-color": "^9.0.0",
     "ngx-cookie-service": "^18.0.0",
+    "ngx-extended-pdf-viewer": "^21.0.0-beta.2",
     "ngx-file-drop": "^16.0.0",
     "ngx-ui-tour-ng-bootstrap": "^15.0.0",
     "rxjs": "^7.8.1",

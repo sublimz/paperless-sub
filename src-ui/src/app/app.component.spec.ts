@@ -25,6 +25,7 @@ import { HotKeyService } from './services/hot-key.service'
 import { PermissionsGuard } from './guards/permissions.guard'
 import { DirtySavedViewGuard } from './guards/dirty-saved-view.guard'
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http'
+import { NgxExtendedPdfViewerModule } from 'ngx-extended-pdf-viewer';
 
 describe('AppComponent', () => {
   let component: AppComponent

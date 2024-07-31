@@ -72,6 +72,7 @@ import { DeletePagesConfirmDialogComponent } from '../common/confirm-dialog/dele
 import { HotKeyService } from 'src/app/services/hot-key.service'
 import { PDFDocumentProxy } from 'ng2-pdf-viewer'
 import { DataType } from 'src/app/data/datatype'
+import { NgxExtendedPdfViewerModule, NgxExtendedPdfViewerService } from 'ngx-extended-pdf-viewer';
 
 enum DocumentDetailNavIDs {
   Details = 1,

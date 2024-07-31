@@ -128,6 +128,7 @@ import { CustomFieldDisplayComponent } from './components/common/custom-field-di
 import { GlobalSearchComponent } from './components/app-frame/global-search/global-search.component'
 import { HotkeyDialogComponent } from './components/common/hotkey-dialog/hotkey-dialog.component'
 import { DeletePagesConfirmDialogComponent } from './components/common/confirm-dialog/delete-pages-confirm-dialog/delete-pages-confirm-dialog.component'
+import { NgxExtendedPdfViewerModule } from 'ngx-extended-pdf-viewer';
 import { TrashComponent } from './components/admin/trash/trash.component'
 import {
   airplane,
@@ -360,7 +361,8 @@ import localeSr from '@angular/common/locales/sr'
 import localeSv from '@angular/common/locales/sv'
 import localeTr from '@angular/common/locales/tr'
 import localeUk from '@angular/common/locales/uk'
-import localeZh from '@angular/common/locales/zh'
+import localeZh from '@angular/common/locales/zh';
+import { ExamplePdfViewerComponent } from './example-pdf-viewer/example-pdf-viewer.component'
 
 registerLocaleData(localeAf)
 registerLocaleData(localeAr)
@@ -502,6 +504,7 @@ function initializeApp(settings: SettingsService) {
     HotkeyDialogComponent,
     DeletePagesConfirmDialogComponent,
     TrashComponent,
+    ExamplePdfViewerComponent,
   ],
   bootstrap: [AppComponent],
   imports: [
@@ -517,6 +520,7 @@ function initializeApp(settings: SettingsService) {
     TourNgBootstrapModule,
     DragDropModule,
     NgxBootstrapIconsModule.pick(icons),
+    NgxExtendedPdfViewerModule,
   ],
   providers: [
     {
