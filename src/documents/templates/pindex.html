@@ -1,0 +1,30 @@
+<!doctype html>
+
+{% load static %}
+
+<html lang="en" data-bs-theme="auto">
+<head>
+	<meta charset="utf-8">
+	<title>Paperless-sub</title>
+	<base href="{% url 'base' %}">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="cookie_prefix" content="{{cookie_prefix}}">
+	<meta name="robots" content="noindex,nofollow">
+	<meta name="author" content="The Paperless-ngx Team">
+	<link rel="icon" type="image/x-icon" href="favicon.ico">
+	<link rel="manifest" href="{% static 'publicfrontend/fr-FR/manifest.webmanifest' %}">
+	<link rel="stylesheet" href="{% static 'publicfrontend/fr-FR/styles.css' %}">
+	<link rel="apple-touch-icon" href="{% static 'publicfrontend/fr-FR/apple_touch_icon' %}">
+</head>
+<body>
+	<h1>PAPERLESS SUB</h1>
+
+	<pngx-root>
+	  <pngx-document-list></pngx-document-list>
+	</pngx-root>>
+
+	<script src="{% static 'publicfrontend/fr-FR/runtime.js' %}" defer></script>
+	<script src="{% static 'publicfrontend/fr-FR/polyfills.js' %}" defer></script>
+	<script src="{% static 'publicfrontend/fr-FR/main.js' %}" defer></script>
+</body>
+</html>

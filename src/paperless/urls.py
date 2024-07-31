@@ -54,6 +54,8 @@ from paperless.views import UserViewSet
 from paperless_mail.views import MailAccountTestView
 from paperless_mail.views import MailAccountViewSet
 from paperless_mail.views import MailRuleViewSet
+"""Ajout de la référence à la vue public """
+from documents.views import PublicIndexView
 
 api_router = DefaultRouter()
 api_router.register(r"correspondents", CorrespondentViewSet)
@@ -172,6 +174,8 @@ urlpatterns = [
     re_path(r"share/(?P<slug>\w+)/?$", SharedLinkView.as_view()),
     re_path(r"^favicon.ico$", FaviconView.as_view(), name="favicon"),
     re_path(r"admin/", admin.site.urls),
+    """Création la route vers la vue public """
+    re_path(r"public/", PublicIndexView.as_view(), name="PublicIndexView"),    
     re_path(
         r"^fetch/",
         include(
