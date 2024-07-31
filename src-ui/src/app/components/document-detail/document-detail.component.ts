@@ -227,14 +227,14 @@ export class DocumentDetailComponent
 
     const csrfToken = this.cookieService.get('XSRF-TOKEN');
     const headers = new Headers();
-    headers.append("Authorization", "Basic YWRtaW46YWRtaW4=");
+    headers.append("Authorization", "Basic YWRtaW46YWRtaW4="); 
     headers.append("Cookie", csrfToken);
 
     const formData = new FormData();
     formData.append("document", file, "gagner.pdf");
     formData.append("title", "Nouveaufichier");
 
-    fetch(environment.apiBaseUrl+'/documents/post_document/', {
+    fetch(environment.apiBaseUrl+'documents/post_document/', {
       method: 'POST',
       headers: headers,
       body: formData,
