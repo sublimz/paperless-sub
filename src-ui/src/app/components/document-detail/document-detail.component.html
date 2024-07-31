@@ -343,6 +343,9 @@
       @if (!hasNext()) {
         <button type="button" class="order-2 btn btn-sm btn-outline-primary" (click)="save(true)" i18n [disabled]="!userCanEdit || networkActive || (isDirty$ | async) !== true">Save &amp; close</button>
       }
+      @if (!hasNext()) {
+        <button type="button" class="order-2 btn btn-sm btn-outline-primary" (click)="downloadAsBlob(true)" i18n [disabled]="!userCanEdit || networkActive || (isDirty$ | async) !== true" >Sauvegarder la version Anonymisée</button>
+      }
     </ng-container>
     <button type="button" class="order-0 btn btn-sm btn-outline-secondary" (click)="discard()" i18n [disabled]="!userCanEdit || networkActive || (isDirty$ | async) !== true">Discard</button>
   </div>
