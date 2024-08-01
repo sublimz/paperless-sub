@@ -344,7 +344,7 @@
         <button type="button" class="order-2 btn btn-sm btn-outline-primary" (click)="save(true)" i18n [disabled]="!userCanEdit || networkActive || (isDirty$ | async) !== true">Save &amp; close</button>
       }
       @if (!hasNext()) {
-        <button type="button" class="order-2 btn btn-sm btn-outline-primary" (click)="downloadAsBlob(true)" i18n [disabled]="!userCanEdit || networkActive || (isDirty$ | async) !== true" >Sauvegarder la version Anonymisée</button>
+        <button type="button" class="order-2 btn btn-sm btn-outline-primary" (click)="downloadAsBlob(true)" i18n [enable]="!userCanEdit || networkActive || (isDirty$ | async) !== true" >Sauvegarder la version Anonymisée</button>
       }
     </ng-container>
     <button type="button" class="order-0 btn btn-sm btn-outline-secondary" (click)="discard()" i18n [disabled]="!userCanEdit || networkActive || (isDirty$ | async) !== true">Discard</button>
@@ -383,7 +383,10 @@
             [showStampEditor]="false"
             [handTool]="false"
             [textLayer]="true"
-            [showToolbar]="true"></ngx-extended-pdf-viewer>
+            [showToolbar]="true"
+            (textLayerRendered)=setEditorHighlightColor()
+            (textLayerRendered)=setEditorHighlightDefaultColor()
+            ></ngx-extended-pdf-viewer>
           </div>
         } @else {
           <object [data]="previewUrl | safeUrl" class="preview-sticky" width="100%"></object>

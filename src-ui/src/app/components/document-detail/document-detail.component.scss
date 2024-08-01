@@ -66,3 +66,42 @@ textarea.rtl {
   height: 100%;
   object-fit: contain;
 }
+
+::ng-deep .swatch {
+  background-color: black;
+}
+
+::ng-deep .ngx-extended-pdf-viewer .ngx-extended-pdf-highlight {
+  background-color: rgb(0, 0, 0);
+}
+
+::ng-deep * > *[style*="clip-path"]{
+  background-color: rgb(0, 0, 0);
+}
+
+::ng-deep * > * .button[class~="swatch"] {
+  color: black !important;
+}
+
+::ng-deep #editorHighlightColorPicker > div > button:nth-child(1) > span {
+  background-color: black !important;
+}
+
+::ng-deep  div.editToolbar > div > button.colorPicker > div > button:nth-child(1) > span {
+  background-color: black !important;
+}
+
+
+::ng-deep  #pdfjs_internal_editor_3 > div:nth-child(2) > div:nth-child(1) > button:nth-child(1) > span:nth-child(1) {
+  background-color: black !important;
+}
+
+::ng-deep html.is-light body.ngx-extended-pdf-viewer-prevent-touch-move pngx-root pngx-file-drop div pngx-app-frame div.container-fluid div.row main.ms-sm-auto.px-md-4.col-md-9.col-lg-10.col-xxxl-11 pngx-document-detail div.row div.col-md-6.col-xl-8.mb-3.d-none.d-md-block.position-relative div.preview-sticky.pdf-viewer-container ngx-extended-pdf-viewer div.zoom div.html div.body.pdf-js-version-4-5 div#outerContainer div#mainContainer div#viewerContainer div#viewer.pdfViewer div.page div.annotationEditorLayer.disabled.highlightEditing div#pdfjs_internal_editor_0.highlightEditor.selectedEditor div.editToolbar div.buttons button.colorPicker span.swatch {
+  background-color: black !important;
+}
+
+::ng-deep [style*="background-color: rgb(255, 255, 152)"] {
+  background-color: black !important;
+  opacity: 1;
+}
+  

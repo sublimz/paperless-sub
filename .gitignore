@@ -3,3 +3,6 @@
 /venv
 
 **/__pycache__/
+paperless.conf
+/src/documents/static/frontend/**
+/static/

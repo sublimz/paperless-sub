@@ -72,7 +72,7 @@ import { DeletePagesConfirmDialogComponent } from '../common/confirm-dialog/dele
 import { HotKeyService } from 'src/app/services/hot-key.service'
 import { PDFDocumentProxy } from 'ng2-pdf-viewer'
 import { DataType } from 'src/app/data/datatype'
-import { NgxExtendedPdfViewerModule, NgxExtendedPdfViewerService } from 'ngx-extended-pdf-viewer';
+import { NgxExtendedPdfViewerModule, NgxExtendedPdfViewerService, pdfDefaultOptions } from 'ngx-extended-pdf-viewer';
 import { CookieService } from 'ngx-cookie-service';
 import { environment } from 'src/environments/environment';
 
@@ -190,6 +190,7 @@ export class DocumentDetailComponent
     }
   }
 
+  
   DocumentDetailNavIDs = DocumentDetailNavIDs
   activeNavID: number
 
@@ -212,42 +213,18 @@ export class DocumentDetailComponent
     private http: HttpClient,
     private hotKeyService: HotKeyService,
     private cookieService: CookieService,
-    private ngxService: NgxExtendedPdfViewerService,
+    private ngxService: NgxExtendedPdfViewerService
   ) {
     super()
   }
 
-  // Fonction pour envoyer la version cliente du pdf dans un nouveau via l'api
-
-
-  public async downloadAsBlob(): Promise<void> {
-    const blob = await this.ngxService.getCurrentDocumentAsBlob();
-    const file = new File([blob], 'gagner.pdf', { type: blob.type,lastModified: Date.now()});
-    console.log(file)
-
-    const csrfToken = this.cookieService.get('XSRF-TOKEN');
-    const headers = new Headers();
-    headers.append("Authorization", "Basic YWRtaW46YWRtaW4="); 
-    headers.append("Cookie", csrfToken);
-
-    const formData = new FormData();
-    formData.append("document", file, "gagner.pdf");
-    formData.append("title", "Nouveaufichier");
-
-    fetch(environment.apiBaseUrl+'documents/post_document/', {
-      method: 'POST',
-      headers: headers,
-      body: formData,
-      redirect: "follow"
-    })
-    .then((response) => response.text())
-    .then((result) => console.log(result))
-    .catch((error) => console.error(error));
-      
+  public setEditorHighlightColor() {
+    this.ngxService.editorHighlightColor = "#000000";
   }
 
-//////////////////////////////////////////////////////////////
-
+  public setEditorHighlightDefaultColor() {
+    this.ngxService.editorHighlightDefaultColor = "#000000";
+  }
 
   titleKeyUp(event) {
     this.titleSubject.next(event.target?.value)
@@ -291,6 +268,11 @@ export class DocumentDetailComponent
   }
 
   ngOnInit(): void {
+
+    this.ngxService.editorHighlightColor="#000000"
+    this.ngxService.editorHighlightDefaultColor="#000000"
+    
+
     this.documentForm.valueChanges
       .pipe(takeUntil(this.unsubscribeNotifier))
       .subscribe(() => {
@@ -1257,4 +1239,51 @@ export class DocumentDetailComponent
           })
       })
   }
+
+
+
+
+
+  // Fonction pour envoyer la version cliente du pdf dans un nouveau via l'api
+
+
+  public async downloadAsBlob(doc: Document): Promise<void> {
+    const blob = await this.ngxService.getCurrentDocumentAsBlob();
+
+    const my_new_title= this.title+"-Anonymisé";
+    console.log(this.metadata.original_checksum)
+
+
+    const file = new File([blob], my_new_title, { type: blob.type,lastModified: Date.now()});
+
+    const csrfToken = this.cookieService.get('XSRF-TOKEN');
+    const headers = new Headers();
+    headers.append("Authorization", "Basic YWRtaW46YWRtaW4="); 
+    headers.append("Cookie", csrfToken);
+    
+    const formData = new FormData();
+
+    
+    formData.append("document", file,my_new_title);
+    formData.append("title", my_new_title);
+
+    fetch(environment.apiBaseUrl+'documents/post_document/', {
+      method: 'POST',
+      headers: headers,
+      body: formData,
+      redirect: "follow"
+    })
+    .then((response) => response.text())
+    .then((result) => console.log(result))
+    .catch((error) => console.error(error));
+
+    this.toastService.showInfo($localize`Document saved successfully.`)   
+
+  }
+
+//////////////////////////////////////////////////////////////
+
+
 }
+
+
