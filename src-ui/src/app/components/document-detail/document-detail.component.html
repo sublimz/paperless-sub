@@ -337,11 +337,12 @@
   <div class="btn-group pb-3 ms-auto">
     <ng-container *pngxIfPermissions="{ action: PermissionAction.Change, type: PermissionType.Document }">
       <button type="submit" class="order-4 btn btn-sm btn-primary" i18n [disabled]="ThereisNewAnnotation || !userCanEdit || networkActive || (isDirty$ | async) !== true">Save</button>
-      <!--@if (hasNext()) { -->
+      @if (hasNext()) { 
         <button type="button" class="order-1 btn btn-sm btn-outline-primary" (click)="saveEditNext()" i18n [disabled]="ThereisNewAnnotation || !userCanEdit || networkActive || (isDirty$ | async) !== true">Save &amp; next</button>
-      <!-- } -->
+      }
         <button type="button" class="order-2 btn btn-sm btn-outline-primary" (click)="save(true)"  i18n [disabled]=" ThereisNewAnnotation || !userCanEdit || networkActive || (isDirty$ | async) !== true">Save &amp; close</button>
         <button type="button" class="order-3 btn btn-sm btn-outline-primary" (click)="UploadAnonymousVersion(true)" i18n [disabled]="!ThereisNewAnnotation || !userCanEdit || networkActive || (isDirty$ | async) !== false " >Save Anonymous version</button>
+
     </ng-container>
     <button type="button" class="order-0 btn btn-sm btn-outline-secondary" (click)="discard()" i18n [disabled]="!userCanEdit || networkActive || (isDirty$ | async) !== true">Discard</button>
   </div>
