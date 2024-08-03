@@ -215,16 +215,12 @@ export class DocumentDetailComponent
     private cookieService: CookieService,
     private ngxService: NgxExtendedPdfViewerService
   ) {
+    pdfDefaultOptions.textLayerMode = 1;
+    ngxService.editorHighlightDefaultColor='#000000'
+    ngxService.editorHighlightColor='#000000'
     super()
   }
 
-  public setEditorHighlightColor() {
-    this.ngxService.editorHighlightColor = "#000000";
-  }
-
-  public setEditorHighlightDefaultColor() {
-    this.ngxService.editorHighlightDefaultColor = "#000000";
-  }
 
   titleKeyUp(event) {
     this.titleSubject.next(event.target?.value)
@@ -1240,34 +1236,54 @@ export class DocumentDetailComponent
       })
   }
 
+//////////////////////////////////////////////////////////
+
+public setHighlightColor() {
+  this.ngxService.editorHighlightColor = "#000000";
+  this.ngxService.editorHighlightDefaultColor = "#000000";
+}
 
 
+public ThereisNewAnnotation=false
 
+public setNewAnnotation() {
+  const Annotation= this.ngxService.getSerializedAnnotations()
+    if (Annotation === null) {
+      //return false if no new annotation
+      this.ThereisNewAnnotation=false
+    } else {
+      //return true if new annotation (so need create anonymousversion)
+      this.ThereisNewAnnotation=true
+    }
 
+  }
+  
+  
   // Fonction pour envoyer la version cliente du pdf dans un nouveau via l'api
 
 
-  public async downloadAsBlob(doc: Document): Promise<void> {
-    const blob = await this.ngxService.getCurrentDocumentAsBlob();
 
-    const my_new_title= this.title+"-Anonymisé";
+  public async UploadAnonymousVersion(): Promise<void> {
+    const blob = await this.ngxService.getCurrentDocumentAsBlob()
+
+    const my_new_title= this.title+"-Anonymisé"
     console.log(this.metadata.original_checksum)
 
 
-    const file = new File([blob], my_new_title, { type: blob.type,lastModified: Date.now()});
+    const file = new File([blob], my_new_title, { type: blob.type,lastModified: Date.now()})
 
-    const csrfToken = this.cookieService.get('XSRF-TOKEN');
-    const headers = new Headers();
-    headers.append("Authorization", "Basic YWRtaW46YWRtaW4="); 
-    headers.append("Cookie", csrfToken);
+    const csrfToken = this.cookieService.get('XSRF-TOKEN')
+    const headers = new Headers()
+    headers.append("Authorization", "Basic YWRtaW46YWRtaW4=")
+    headers.append("Cookie", csrfToken)
     
-    const formData = new FormData();
+    const formData = new FormData()
 
     
     formData.append("document", file,my_new_title);
     formData.append("title", my_new_title);
 
-    fetch(environment.apiBaseUrl+'documents/post_document/', {
+    await fetch(environment.apiBaseUrl+'documents/post_document/', {
       method: 'POST',
       headers: headers,
       body: formData,
@@ -1277,7 +1293,7 @@ export class DocumentDetailComponent
     .then((result) => console.log(result))
     .catch((error) => console.error(error));
 
-    this.toastService.showInfo($localize`Document saved successfully.`)   
+    this.toastService.showInfo($localize`New Anonymous doc is created successfully.`)   
 
   }
 
