@@ -215,8 +215,6 @@ export class DocumentDetailComponent
     private cookieService: CookieService,
     private ngxService: NgxExtendedPdfViewerService
   ) {
-    pdfDefaultOptions.textLayerMode=1
-    pdfDefaultOptions.annotationEditorMode=1
     ngxService.editorHighlightDefaultColor='#000000'
     ngxService.editorHighlightColor='#000000'
     super()
