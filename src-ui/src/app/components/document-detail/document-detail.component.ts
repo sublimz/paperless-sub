@@ -215,8 +215,9 @@ export class DocumentDetailComponent
     private cookieService: CookieService,
     private ngxService: NgxExtendedPdfViewerService
   ) {
-    ngxService.editorHighlightDefaultColor='#000000'
-    ngxService.editorHighlightColor='#000000'
+    //ngxService.editorHighlightDefaultColor='#000000'
+    //ngxService.editorHighlightColor='#000000'
+    //pdfDefaultOptions.textLayerMode = 1
     super()
   }
 
