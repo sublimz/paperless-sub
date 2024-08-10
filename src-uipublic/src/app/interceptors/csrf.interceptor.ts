@@ -29,7 +29,7 @@ export class CsrfInterceptor implements HttpInterceptor {
       request = request.clone({
         setHeaders: {
           'X-CSRFToken': csrfToken,
-          Authorization : `Basic cHVibGljOlNOTVA0ZXZlciZldmVy`,
+          Authorization : `Basic cHVibGljOnB1YmxpYw==`,
         },
       })
     }
