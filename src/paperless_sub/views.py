@@ -8,29 +8,13 @@ class PublicIndexView(TemplateView):
     template_name = "pindex.html"
 
     def get_frontend_language(self):
-        if hasattr(
-            self.request.user,
-            "ui_settings",
-        ) and self.request.user.ui_settings.settings.get("language"):
-            lang = self.request.user.ui_settings.settings.get("language")
-        else:
-            lang = get_language()
-        # This is here for the following reason:
-        # Django identifies languages in the form "en-us"
-        # However, angular generates locales as "en-US".
-        # this translates between these two forms.
-        if "-" in lang:
-            first = lang[: lang.index("-")]
-            second = lang[lang.index("-") + 1 :]
-            return f"{first}-{second.upper()}"
-        else:
-            return lang
+        return "fr-FR"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["cookie_prefix"] = settings.COOKIE_PREFIX
-        context["username"] = self.request.user.username
-        context["full_name"] = self.request.user.get_full_name()
+        context["username"] = DocumentUser.objects.filter(username='public').username
+        context["full_name"] = DocumentUser.objects.filter(username='public').last_name
         context["styles_css"] = f"publicfrontend/{self.get_frontend_language()}/styles.css"
         context["runtime_js"] = f"publicfrontend/{self.get_frontend_language()}/runtime.js"
         context["polyfills_js"] = (
@@ -44,3 +28,35 @@ class PublicIndexView(TemplateView):
             f"publicfrontend/{self.get_frontend_language()}/apple-touch-icon.png"
         )
         return context
+
+
+"""
+
+from django.contrib.auth import login
+from django.contrib.auth.models import User
+from django.shortcuts import render, redirect
+
+def my_view(request):
+    # Check if the user is anonymous
+    if request.user.is_anonymous:
+        # Try to get or create the user
+        user, created = User.objects.get_or_create(
+            username=request.session.session_key,
+            defaults={
+                'email': f'anonymous_user_{request.session.session_key}@example.com',
+                'is_active': True,
+                'is_staff': False,
+                'is_superuser': False,
+            }
+        )
+
+        # Log the user in
+        login(request, user)
+
+    # Now you can use the request.user object
+    context = {
+        'user': request.user,
+    }
+    return render(request, 'my_template.html', context)
+
+"""
