@@ -21,8 +21,6 @@ logger = logging.getLogger("paperless.tasks")
 
 
 @shared_task
-@receiver(models.signals.m2m_changed, sender=Document.tags.through)
-@receiver(models.signals.post_save, sender=Document)
 def watermark():
 
     public_tags = Tag.objects.filter(name='public')
