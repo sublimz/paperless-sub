@@ -15,7 +15,7 @@ from documents.models import Tag
 from documents.tasks import bulk_update_documents
 from documents.tasks import consume_file
 from documents.tasks import update_document_archive_file
-from paperless_sub.StampDocument import StampDocument
+
 
 logger = logging.getLogger("paperless.tasks")
 
