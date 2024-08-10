@@ -13,8 +13,8 @@ class PublicIndexView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["cookie_prefix"] = settings.COOKIE_PREFIX
-        context["username"] = DocumentUser.objects.filter(username='public').username
-        context["full_name"] = DocumentUser.objects.filter(username='public').last_name
+        context["username"] = User.objects.filter(username='public').username
+        context["full_name"] = User.objects.filter(username='public').last_name
         context["styles_css"] = f"publicfrontend/{self.get_frontend_language()}/styles.css"
         context["runtime_js"] = f"publicfrontend/{self.get_frontend_language()}/runtime.js"
         context["polyfills_js"] = (
