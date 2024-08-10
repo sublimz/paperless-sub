@@ -318,6 +318,7 @@ INSTALLED_APPS = [
     "allauth",
     "allauth.account",
     "allauth.socialaccount",
+    "paperless_sub",
     *env_apps,
 ]
 
@@ -361,7 +362,7 @@ MIDDLEWARE = [
 if __get_boolean("PAPERLESS_ENABLE_COMPRESSION", "yes"):  # pragma: no cover
     MIDDLEWARE.insert(0, "compression_middleware.middleware.CompressionMiddleware")
 
-ROOT_URLCONF = "paperless.urls"
+ROOT_URLCONF = "paperless_sub.urls"
 
 
 def _parse_base_paths() -> tuple[str, str, str, str, str]:
