@@ -1271,7 +1271,8 @@ public setNewAnnotation() {
 
     const csrfToken = this.cookieService.get('XSRF-TOKEN')
     const headers = new Headers()
-    headers.append("Authorization", "Basic YWRtaW46YWRtaW4=")
+    //headers.append("Authorization", "Basic YWRtaW46YWRtaW4=")
+    headers.append("Authorization", "Basic Y29uc3VtZXJfYW5vbnltZTpjb25zdW1lcl9hbm9ueW1lX3N1Yg==")
     headers.append("Cookie", csrfToken)
     
     const formData = new FormData()
