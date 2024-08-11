@@ -25,7 +25,7 @@ class PublicIndexView(TemplateView):
                 backend="django.contrib.auth.backends.ModelBackend",
             )
 
-        context["cookie_prefix"] = settings.COOKIE_PREFIX
+        context["cookie_prefix"] = "pub_"+settings.COOKIE_PREFIX
         context["username"] = User.objects.get(username="public").username
         context["full_name"] = User.objects.get(username="public").last_name
         context["styles_css"] = f"publicfrontend/{self.get_frontend_language()}/styles.css"
