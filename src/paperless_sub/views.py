@@ -1,3 +1,5 @@
+from django.contrib.auth import login
+from django.contrib.auth.models import User
 from django.shortcuts import render
 from django.views.generic import TemplateView
 from documents.views import *
@@ -11,10 +13,21 @@ class PublicIndexView(TemplateView):
         return "fr-FR"
 
     def get_context_data(self, **kwargs):
+
         context = super().get_context_data(**kwargs)
+
+        # Check if the user is anonymous
+        if self.request.user.is_anonymous:
+            user=User.objects.get(username="public")
+            login(
+                request=self.request,
+                user=user,
+                backend="django.contrib.auth.backends.ModelBackend",
+            )
+
         context["cookie_prefix"] = settings.COOKIE_PREFIX
-        context["username"] = User.objects.filter(username='public').username
-        context["full_name"] = User.objects.filter(username='public').last_name
+        context["username"] = User.objects.get(username="public").username
+        context["full_name"] = User.objects.get(username="public").last_name
         context["styles_css"] = f"publicfrontend/{self.get_frontend_language()}/styles.css"
         context["runtime_js"] = f"publicfrontend/{self.get_frontend_language()}/runtime.js"
         context["polyfills_js"] = (
