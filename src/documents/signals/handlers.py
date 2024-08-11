@@ -42,6 +42,11 @@ from documents.permissions import set_permissions_for_object
 
 logger = logging.getLogger("paperless.handlers")
 
+"""
+@receiver(m2m_changed, sender=Document.tags.through)
+def handle_tags_change(sender, **kwargs):
+    tags_changed(sender=sender, **kwargs)
+"""
 
 def add_inbox_tags(sender, document: Document, logging_group=None, **kwargs):
     if document.owner is not None:
