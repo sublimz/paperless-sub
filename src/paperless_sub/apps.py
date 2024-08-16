@@ -6,11 +6,18 @@ class PaperlessSubConfig(AppConfig):
 
     def ready(self):
 
+        from paperless_sub import signals
+
         from django.dispatch import receiver
         from django.db import DatabaseError, OperationalError
         from django.contrib.auth.models import User, Permission
         from django.contrib.contenttypes.models import ContentType
         from documents.models import User as DocumentUser
+        from documents.models import CustomField
+        from documents.models import Workflow
+        from documents.models import WorkflowAction
+        from documents.models import WorkflowTrigger
+
         import logging
 
         try:
@@ -37,6 +44,20 @@ class PaperlessSubConfig(AppConfig):
                     is_active=True
                 )
                 system_user_2.user_permissions.add(view_uisettings_permission, view_document_permission)
+
+            if not CustomField.objects.filter(name='Date de début de publication').exists():
+                CustomField.objects.create(name='Date de début de publication',data_type='date')
+
+            if not CustomField.objects.filter(name='Date de fin de publication').exists():
+                CustomField.objects.create(name='Date de fin de publication',data_type='date')    
+
+            """
+            if not Workflow.objects.filter(name='[SUB] ajoute champ perso date debut pub et date fin pub').exists()
+                Workflow.objects.create(name='[SUB] ajoute champ perso date debut pub et date fin pub',order=1,enabled=1)
+                WorkflowAction.objects.create(workflow_id=1,workflowaction_id=1)
+                WorkflowTrigger.objects.create(workflow_id=1,workflowtrigger_id=1)
+            """
+
         except:
             pass
 
