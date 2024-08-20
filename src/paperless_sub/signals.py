@@ -1,5 +1,5 @@
 from django.db.models.signals import m2m_changed
-from datetime import date, timedelta
+from datetime import date, timedelta, timezone
 import re
 import hashlib
 from django.dispatch import receiver
@@ -13,6 +13,11 @@ from celery import shared_task
 from celery.signals import task_postrun
 from auditlog.models import LogEntry
 from .sign import SignDocument
+from django.contrib.auth.models import User, Permission, Group
+from guardian.shortcuts import assign_perm, remove_perm
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from documents.signals import document_updated
 
 logger = logging.getLogger("paperless.handlers")
 
@@ -50,38 +55,58 @@ def task_postrun_handler(sender=consume_file, **kwargs):
 @receiver(post_save, sender=CustomFieldInstance)
 def custom_fields_post_save(sender, instance, created, **kwargs):
     if not created:
+        # on initialise les champ custom
         doc=Document.objects.get(id=instance.document_id)
 
         id_cf_publier=CustomField.objects.get(name='Publier')
+
         dp=CustomField.objects.get(name='Date de début de publication')
         ddp=CustomFieldInstance.objects.get(document_id=doc.id,field_id=dp.id)
         fp=CustomField.objects.get(name='Date de fin de publication')
         dfp=CustomFieldInstance.objects.get(document_id=doc.id,field_id=fp.id)
-        
-        #si la màj concerne le champ Publier et que sa valeur est True 
-        # et que la date de début et de fin sont non null
-        if ( instance.field_id==id_cf_publier.id and instance.value_bool==True 
-             and ddp.value_date is not None and dfp.value_date is not None ):
-            
-            # debug : print(f"{id_cf_publier.id}L'objet CustomField {instance.id} et le champ {instance.field_id} à pris la valeur {instance.value_bool} pour le {instance.document_id} par {sender}")
-            try:
-                if doc.mime_type != "application/pdf":
-                   logger.warning(
-                   f"Document {doc.id} is not a PDF, cannot add watermark",
-                   )
-                print(f"on publie le {doc.id} qui se situe {doc.source_path}")
-                #on tamponne le doc
-                mySignTest=SignDocument()
-                mySignTest.applyStamp(doc.source_path, inUrl="http://exemple.com", inChecksumValue="1d3sf1sd53f1s53" )
-                doc.checksum = hashlib.md5(doc.source_path.read_bytes()).hexdigest()
-                doc.save()
-                print(f"tampon ajouté sur {doc.id}")
-                update_document_archive_file(document_id=doc.id)
-                bulk_update_documents([doc.id])
 
-            except Exception as e:
-                logger.exception(f"Error on trying add watermark on {doc.id}: {e}")
 
+
+@receiver(document_updated)
+def mon_recepteur(sender, **kwargs):
+    doc = kwargs.get('document')
+    # Traitez le document comme nécessaire
+    print(f"Document mis à jour : {doc.id} {doc.title}")
+    id_cf_publier=CustomField.objects.get(name='Publier')
+    cf_doc=CustomFieldInstance.objects.get(document_id=doc.id,field_id=id_cf_publier.id)
+    if cf_doc.value_bool == True:
+        print("traitement de la publication")
+        try:
+            if doc.mime_type != "application/pdf":
+                logger.warning(
+                f"Document {doc.id} is not a PDF, cannot add watermark",
+                )        
+            mySignTest=SignDocument()
+            mySignTest.applyStamp(doc.source_path, inUrl="http://exemple.com", inChecksumValue="1d3sf1sd53f1s53" )
+            #mySignTest.applySignature(doc.source_path)
+            doc.checksum = hashlib.md5(doc.source_path.read_bytes()).hexdigest()
+            print(f"tampon ajouté sur {doc.id}")
+            cf_doc.value_bool=False
+            #Document.objects.filter(id=doc.id).update(modified=now())
+            cf_doc.save()
+            doc.save()
+
+            #Màj
+            update_document_archive_file.delay(document_id=doc.id)
+            bulk_update_documents([doc.id])
+
+            #Suppression du champ publier
+            cf_doc.delete()
+
+            g_public, created = Group.objects.get_or_create(name='public')
+            g_instructeur, created = Group.objects.get_or_create(name='instructeur')
+            assign_perm("view_document", g_public, doc)
+            assign_perm("view_document", g_instructeur, doc)
+            remove_perm("change_document", g_instructeur, doc)
+            doc.save()
+
+        except Exception as e:
+            logger.exception(f"Error on trying add watermark on {doc.id}: {e}")
 
 
 

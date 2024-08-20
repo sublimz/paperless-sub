@@ -43,6 +43,8 @@ class PublicIndexView(TemplateView):
         return context
 
 
+
+
 """
 
 from django.contrib.auth import login
