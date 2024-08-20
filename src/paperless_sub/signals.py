@@ -1,16 +1,18 @@
 from django.db.models.signals import m2m_changed
 from datetime import date, timedelta
 import re
+import hashlib
 from django.dispatch import receiver
 import logging
 from django.db.models.signals import pre_save, post_save
 from documents.models import Document
 from documents.models import CustomField
 from documents.models import CustomFieldInstance
-from documents.tasks import consume_file
+from documents.tasks import consume_file,bulk_update_documents,update_document_archive_file
 from celery import shared_task
 from celery.signals import task_postrun
 from auditlog.models import LogEntry
+from .sign import SignDocument
 
 logger = logging.getLogger("paperless.handlers")
 
@@ -53,10 +55,24 @@ def custom_fields_post_save(sender, instance, created, **kwargs):
         if instance.field_id==id_cf_publier.id and instance.value_bool==True:
             #print(f"{id_cf_publier.id}L'objet CustomField {instance.id} et le champ {instance.field_id} à pris la valeur {instance.value_bool} pour le {instance.document_id} par {sender}")
             try:
-                print(f"on publie le {instance.document_id}")
-                
-            except:
-                pass
+                doc=Document.objects.get(id=instance.document_id)
+                if doc.mime_type != "application/pdf":
+                   logger.warning(
+                   f"Document {doc.id} is not a PDF, cannot add watermark",
+                   )
+                print(f"on publie le {doc.id} qui se situe {doc.source_path}")
+                mySignTest=SignDocument()
+                mySignTest.applyStamp(doc.source_path)
+                doc.checksum = hashlib.md5(doc.source_path.read_bytes()).hexdigest()
+                doc.save()
+                print(f"tampon ajouté sur {doc.id}")
+                update_document_archive_file(document_id=doc.id)
+                bulk_update_documents([doc.id])
+
+            except Exception as e:
+                logger.exception(f"Error on trying add watermark on {doc.id}: {e}")
+
+
                 #CustomFieldInstance.objects.get(document_id=1,field_id=3).delete()
 
 #note = Note.objects.get(id=int(request.GET.get("id")))
