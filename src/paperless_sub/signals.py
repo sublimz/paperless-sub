@@ -50,19 +50,29 @@ def task_postrun_handler(sender=consume_file, **kwargs):
 @receiver(post_save, sender=CustomFieldInstance)
 def custom_fields_post_save(sender, instance, created, **kwargs):
     if not created:
+        doc=Document.objects.get(id=instance.document_id)
+
         id_cf_publier=CustomField.objects.get(name='Publier')
+        dp=CustomField.objects.get(name='Date de début de publication')
+        ddp=CustomFieldInstance.objects.get(document_id=doc.id,field_id=dp.id)
+        fp=CustomField.objects.get(name='Date de fin de publication')
+        dfp=CustomFieldInstance.objects.get(document_id=doc.id,field_id=fp.id)
+        
         #si la màj concerne le champ Publier et que sa valeur est True 
-        if instance.field_id==id_cf_publier.id and instance.value_bool==True:
-            #print(f"{id_cf_publier.id}L'objet CustomField {instance.id} et le champ {instance.field_id} à pris la valeur {instance.value_bool} pour le {instance.document_id} par {sender}")
+        # et que la date de début et de fin sont non null
+        if ( instance.field_id==id_cf_publier.id and instance.value_bool==True 
+             and ddp.value_date is not None and dfp.value_date is not None ):
+            
+            # debug : print(f"{id_cf_publier.id}L'objet CustomField {instance.id} et le champ {instance.field_id} à pris la valeur {instance.value_bool} pour le {instance.document_id} par {sender}")
             try:
-                doc=Document.objects.get(id=instance.document_id)
                 if doc.mime_type != "application/pdf":
                    logger.warning(
                    f"Document {doc.id} is not a PDF, cannot add watermark",
                    )
                 print(f"on publie le {doc.id} qui se situe {doc.source_path}")
+                #on tamponne le doc
                 mySignTest=SignDocument()
-                mySignTest.applyStamp(doc.source_path)
+                mySignTest.applyStamp(doc.source_path, inUrl="http://exemple.com", inChecksumValue="1d3sf1sd53f1s53" )
                 doc.checksum = hashlib.md5(doc.source_path.read_bytes()).hexdigest()
                 doc.save()
                 print(f"tampon ajouté sur {doc.id}")
@@ -71,6 +81,9 @@ def custom_fields_post_save(sender, instance, created, **kwargs):
 
             except Exception as e:
                 logger.exception(f"Error on trying add watermark on {doc.id}: {e}")
+
+
+
 
 
                 #CustomFieldInstance.objects.get(document_id=1,field_id=3).delete()

@@ -1,5 +1,6 @@
 
 #pip install --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org pyhanko[opentype]
+import logging
 from pyhanko.pdf_utils.incremental_writer import IncrementalPdfFileWriter
 from pyhanko.sign import fields,signers
 from pyhanko.sign.fields import SigSeedSubFilter
@@ -13,6 +14,7 @@ from pyhanko.pdf_utils.layout import AxisAlignment, Margins, SimpleBoxLayoutRule
 from pyhanko.pdf_utils.reader import PdfFileReader
 from pyhanko.stamp import QRPosition,QRStampStyle,QRStamp
 
+logger = logging.getLogger("paperless.bulk_edit")
 
 class SignDocument:
     CERT_PATH_FILE='../static/certs/cert.p12'
@@ -97,26 +99,30 @@ class SignDocument:
                 r=PdfFileReader(doc)
                 page_count=(int(r.root['/Pages']['/Count']))
         except:
-            print("cannot open the file")
+            print(f"cannot open the file {inputFile}")
         return page_count
 
     #Application de la signature
-    def applyStamp(self,inFile):
+    def applyStamp(self,inFile,inUrl,inChecksumValue):
         
         #meta=self.signatureMeta()
         #signer=self.createSignerpkcs()
-        total_page=self.page_count(inFile)
+        try: 
+            total_page=self.page_count(inFile)
 
-        with open(inFile, 'rb+') as fin:
-            pdf_out = IncrementalPdfFileWriter(fin, strict=False)
+            with open(inFile, 'rb+') as fin:
+                pdf_out = IncrementalPdfFileWriter(fin, strict=False)
 
-            #apply stamp from page 1 : for i in range(1,total_page):
-            for i in range(total_page):
-                #print(f"page {i} sur {total_page}")
-                mystamp = QRStamp(writer=pdf_out, style=self.style,url="http://exemple.com",text_params={'url': 'https://example.com/dsklfjsdmlfklsdf/dsmfjskmdfjm','signer':self.signer,'currentpage':i+1,'totalpage':total_page,'checksum':'0f12df21sdf154'})       
-                mystamp.apply(dest_page=i, x=10, y=15)
+                #apply stamp from page 1 : for i in range(1,total_page):
+                for i in range(total_page):
+                    #print(f"page {i} sur {total_page}")
+                    mystamp = QRStamp(writer=pdf_out, style=self.style,url="http://exemple.com",text_params={'url': 'https://example.com/dsklfjsdmlfklsdf/dsmfjskmdfjm','signer':self.signer,'currentpage':i+1,'totalpage':total_page,'checksum':inChecksumValue})       
+                    mystamp.apply(dest_page=i, x=10, y=15)
 
-            pdf_out.write_in_place()
+                pdf_out.write_in_place()
+
+        except Exception as e:
+            logger.exception(f"Error to add stamp on document {doc.id}: {e}")
 
 #mySignTest=SignDocument()
 #mySignTest.applyStamp("c:/temp/df/essai.pdf")
