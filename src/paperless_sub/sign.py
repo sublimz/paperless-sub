@@ -13,6 +13,7 @@ from pyhanko.sign import fields, signers
 from pyhanko.pdf_utils.layout import AxisAlignment, Margins, SimpleBoxLayoutRule
 from pyhanko.pdf_utils.reader import PdfFileReader
 from pyhanko.stamp import QRPosition,QRStampStyle,QRStamp
+from pikepdf import Pdf, Page
 
 logger = logging.getLogger("paperless.bulk_edit")
 
@@ -20,6 +21,8 @@ class SignDocument:
     CERT_PATH_FILE='../static/certs/cert.p12'
     CERT_PASSPHRASE=b'l1O!Yutd@XTceY2D'
     STAMP_FONT='../static/certs/Espera-Regular.ttf'
+    MODEL='../static/certs/stamp.pdf'
+    BLANK='../static/certs/blank.pdf'
 
     zero_margins = SimpleBoxLayoutRule(
         x_align=AxisAlignment.ALIGN_MID,
@@ -71,6 +74,17 @@ class SignDocument:
         )
         return signature_meta
 
+    #Vérification de la présence du champ 
+    def verif_already_published(self,inFile):
+        with open(inFile, 'rb') as doc:
+            r = PdfFileReader(doc)
+            if len(r.embedded_signatures) > 0:
+                for i in range(len(r.embedded_signatures)):
+                    sig = r.embedded_signatures[i]
+                    if sig.field_name == "Publication":
+                        print(f"champ {sig.field_name} déjà présent ")
+                        return True
+
     #Application de la signature
     def applySignature(self,inFile):
         
@@ -104,30 +118,45 @@ class SignDocument:
 
     #Application de la signature
     def applyStamp(self,inFile,inUrl,inChecksumValue):
-        
-        #meta=self.signatureMeta()
-        #signer=self.createSignerpkcs()
+
         try: 
-            total_page=self.page_count(inFile)
+            pdfsource = Pdf.open(inFile, allow_overwriting_input=True)    
+            total_page=len(pdfsource.pages)
 
-            with open(inFile, 'rb+') as fin:
-                pdf_out = IncrementalPdfFileWriter(fin, strict=False)
+            #on créer un pdf vierge avec autant de page que l'original
+            dst = Pdf.new()
+            for i in range(total_page):
+                print(f"page {i} sur {total_page}")
+                dst.add_blank_page()
+            dst.save(self.MODEL)
+            dst.close
 
-                #apply stamp from page 1 : for i in range(1,total_page):
+            with open(self.MODEL, 'rb+') as model:
+                pdf_model = IncrementalPdfFileWriter(model, strict=False)
+                #apply stamp from page 1
                 for i in range(total_page):
-                    #print(f"page {i} sur {total_page}")
-                    mystamp = QRStamp(writer=pdf_out, style=self.style,url="http://exemple.com",text_params={'url': 'https://example.com/dsklfjsdmlfklsdf/dsmfjskmdfjm','signer':self.signer,'currentpage':i+1,'totalpage':total_page,'checksum':inChecksumValue})       
-                    mystamp.apply(dest_page=i, x=10, y=15)
+                    mystamp = QRStamp(writer=pdf_model, style=self.style,url="http://exemple.com",text_params={'url': 'https://example.com/dsklfjsdmlfklsdf/dsmfjskmdfjm','signer':'signataire','currentpage':i+1,'totalpage':total_page,'checksum':'0f12df21sdf154'})       
+                    mystamp.apply(dest_page=i, x=10, y=10)
+                #on créér un modèle avec les stamps à overlay
+                pdf_model.write_in_place()
 
-                pdf_out.write_in_place()
+
+            pdfmodel = Pdf.open(self.MODEL)
+            for i in range(0,total_page):
+                destination_page = Page(pdfsource.pages[i])
+                thumbnail = Page(pdfmodel.pages[i])
+                destination_page.add_overlay(thumbnail)
+            pdfmodel.close
+            pdfsource.save()
+            pdfsource.close
 
         except Exception as e:
-            logger.exception(f"Error to add stamp on document {doc.id}: {e}")
+            logger.exception(f"Error to add stamp on document {inFile}: {e}")
 
-#mySignTest=SignDocument()
-#mySignTest.applyStamp("c:/temp/df/essai.pdf")
-#mySignTest.applySignature("c:/temp/df/essai.pdf")
 
+#if not myStampTest.verif_already_published("c:/temp/df/essai.pdf"):
+#    myStampTest.applyStamp("c:/temp/df/essai.pdf","c:/temp/df/essai_model.pdf")
+#    myStampTest.applySignature("c:/temp/df/essai.pdf")
 
 
 
