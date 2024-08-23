@@ -21,6 +21,7 @@ class SignDocument:
     CERT_PATH_FILE='../static/certs/cert.p12'
     CERT_PASSPHRASE=b'l1O!Yutd@XTceY2D'
     STAMP_FONT='../static/certs/Espera-Regular.ttf'
+    #settings.SCRATCH_DIR
     MODEL='../static/certs/stamp.pdf'
     BLANK='../static/certs/blank.pdf'
 

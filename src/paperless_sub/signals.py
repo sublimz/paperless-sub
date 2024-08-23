@@ -17,7 +17,7 @@ from django.contrib.auth.models import User, Permission, Group
 from guardian.shortcuts import assign_perm, remove_perm
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from documents.signals import document_updated
+from documents.signals import document_updated, document_consumption_finished
 
 logger = logging.getLogger("paperless.handlers")
 
@@ -32,40 +32,22 @@ def task_postrun_handler(sender=consume_file, **kwargs):
         print(f"{doc_id} de type {type(doc_id)}")
         #date de début de publication à la date du jour
         dp=CustomField.objects.get(name='Date de début de publication')
-        ddp=CustomFieldInstance.objects.get(document_id=doc_id,field_id=dp.id)
+        ddp, created=CustomFieldInstance.objects.get_or_create(document_id=doc_id,field_id=dp.id)
         if ddp.value_date is None:
             ddp.value_date=date.today()
             ddp.save()
         #date de fin de publication dans 60 jrs
         fp=CustomField.objects.get(name='Date de fin de publication')
-        dfp=CustomFieldInstance.objects.get(document_id=doc_id,field_id=fp.id)
+        dfp, created=CustomFieldInstance.objects.get_or_create(document_id=doc_id,field_id=fp.id)
         if dfp.value_date is None:
             dfp.value_date=date.today() + timedelta(days=60)
             dfp.save()
         #Publier à faux
         p=CustomField.objects.get(name='Publier')
-        cp=CustomFieldInstance.objects.get(document_id=doc_id,field_id=p.id)
+        cp, created=CustomFieldInstance.objects.get_or_create(document_id=doc_id,field_id=p.id)
         if cp.value_bool is None:
             cp.value_bool=False
             cp.save()
-
-
-            
-#Evaluation de si on publie
-@receiver(post_save, sender=CustomFieldInstance)
-def custom_fields_post_save(sender, instance, created, **kwargs):
-    if not created:
-        # on initialise les champ custom
-        doc=Document.objects.get(id=instance.document_id)
-
-        id_cf_publier=CustomField.objects.get(name='Publier')
-
-        dp=CustomField.objects.get(name='Date de début de publication')
-        ddp=CustomFieldInstance.objects.get(document_id=doc.id,field_id=dp.id)
-        fp=CustomField.objects.get(name='Date de fin de publication')
-        dfp=CustomFieldInstance.objects.get(document_id=doc.id,field_id=fp.id)
-
-
 
 @receiver(document_updated)
 def mon_recepteur(sender, **kwargs):
