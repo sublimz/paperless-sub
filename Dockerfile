@@ -164,7 +164,7 @@ RUN set -eux \
         && rm --force --verbose *.deb \
     && rm --recursive --force --verbose /var/lib/apt/lists/* \
   && echo "Installing supervisor" \
-    && python3 -m pip install --default-timeout=1000 --upgrade --no-cache-dir supervisor==4.2.5
+    && python3 -m pip install --default-timeout=1000 --upgrade --no-cache-dir supervisor==4.2.5 \
     && python3 -m pip install pyhanko[opentype]
 
 # Copy gunicorn config
