@@ -3,7 +3,6 @@ from django.utils.translation import gettext_lazy as _
 
 from paperless.signals import handle_failed_login
 
-
 class PaperlessConfig(AppConfig):
     name = "paperless"
 

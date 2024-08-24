@@ -1177,3 +1177,13 @@ if DEBUG:  # pragma: no cover
 # Soft Delete
 ###############################################################################
 EMPTY_TRASH_DELAY = max(__get_int("PAPERLESS_EMPTY_TRASH_DELAY", 30), 1)
+
+###############################################################################
+# PAPERLESS_SUB_SETTINGS
+###############################################################################
+CERT_PATH_FILE = os.getenv("CERT_PATH_FILE")
+CERT_PASSPHRASE= os.getenv("CERT_PASSPHRASE")
+STAMP_FONT=os.getenv("STAMP_FONT")
+#settings.SCRATCH_DIR
+MODEL=os.getenv("MODEL")
+BLANK=os.getenv("BLANK")

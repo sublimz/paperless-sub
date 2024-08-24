@@ -14,16 +14,17 @@ from pyhanko.pdf_utils.layout import AxisAlignment, Margins, SimpleBoxLayoutRule
 from pyhanko.pdf_utils.reader import PdfFileReader
 from pyhanko.stamp import QRPosition,QRStampStyle,QRStamp
 from pikepdf import Pdf, Page
+from django.conf import settings
 
 logger = logging.getLogger("paperless.bulk_edit")
 
 class SignDocument:
-    CERT_PATH_FILE='../data/certs/cert.p12'
-    CERT_PASSPHRASE=b'l1O!Yutd@XTceY2D'
-    STAMP_FONT='../data/certs/Espera-Regular.ttf'
-    #settings.SCRATCH_DIR
-    MODEL='../data/certs/stamp.pdf'
-    BLANK='../data/certs/blank.pdf'
+#    CERT_PATH_FILE='../data/certs/cert.p12'
+#    CERT_PASSPHRASE=b'l1O!Yutd@XTceY2D'
+#    STAMP_FONT='../data/certs/Espera-Regular.ttf'
+#    #settings.SCRATCH_DIR
+#    MODEL='../data/certs/stamp.pdf'
+#    BLANK='../data/certs/blank.pdf'
 
     zero_margins = SimpleBoxLayoutRule(
         x_align=AxisAlignment.ALIGN_MID,
@@ -51,7 +52,7 @@ class SignDocument:
     #récupération des infos du certificat
     @classmethod
     def createSignerpkcs(self):
-        signer = signers.SimpleSigner.load_pkcs12(pfx_file=self.CERT_PATH_FILE, passphrase=self.CERT_PASSPHRASE) 
+        signer = signers.SimpleSigner.load_pkcs12(pfx_file=settings.CERT_PATH_FILE, passphrase=settings.CERT_PASSPHRASE) 
         if signer == None:
             print("Error while opening PFX file.")
         return signer
@@ -129,10 +130,10 @@ class SignDocument:
             for i in range(total_page):
                 print(f"page {i} sur {total_page}")
                 dst.add_blank_page()
-            dst.save(self.MODEL)
+            dst.save(settings.MODEL)
             dst.close
 
-            with open(self.MODEL, 'rb+') as model:
+            with open(settings.MODEL, 'rb+') as model:
                 pdf_model = IncrementalPdfFileWriter(model, strict=False)
                 #apply stamp from page 1
                 for i in range(total_page):
@@ -142,7 +143,7 @@ class SignDocument:
                 pdf_model.write_in_place()
 
 
-            pdfmodel = Pdf.open(self.MODEL)
+            pdfmodel = Pdf.open(settings.MODEL)
             for i in range(0,total_page):
                 destination_page = Page(pdfsource.pages[i])
                 thumbnail = Page(pdfmodel.pages[i])
