@@ -18,12 +18,12 @@ from pikepdf import Pdf, Page
 logger = logging.getLogger("paperless.bulk_edit")
 
 class SignDocument:
-    CERT_PATH_FILE='../static/certs/cert.p12'
+    CERT_PATH_FILE='../data/certs/cert.p12'
     CERT_PASSPHRASE=b'l1O!Yutd@XTceY2D'
-    STAMP_FONT='../static/certs/Espera-Regular.ttf'
+    STAMP_FONT='../data/certs/Espera-Regular.ttf'
     #settings.SCRATCH_DIR
-    MODEL='../static/certs/stamp.pdf'
-    BLANK='../static/certs/blank.pdf'
+    MODEL='../data/certs/stamp.pdf'
+    BLANK='../data/certs/blank.pdf'
 
     zero_margins = SimpleBoxLayoutRule(
         x_align=AxisAlignment.ALIGN_MID,
@@ -152,7 +152,7 @@ class SignDocument:
             pdfsource.close
 
         except Exception as e:
-            logger.exception(f"Error to add stamp on document {inFile}: {e}")
+            logger.exception(f"Error to add stamp on document {inFile} : {e}")
 
 
 #if not myStampTest.verif_already_published("c:/temp/df/essai.pdf"):

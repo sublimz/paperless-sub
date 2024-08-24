@@ -53,46 +53,46 @@ def task_postrun_handler(sender=consume_file, **kwargs):
 def mon_recepteur(sender, **kwargs):
     doc = kwargs.get('document')
     # Traitez le document comme nécessaire
-    print(f"Document mis à jour : {doc.id} {doc.title}")
     id_cf_publier=CustomField.objects.get(name='Publier')
-    cf_doc=CustomFieldInstance.objects.get(document_id=doc.id,field_id=id_cf_publier.id)
-    if cf_doc.value_bool == True:
-        ## Ajouter contrôle date de publication
-        print("traitement de la publication")
-        try:
-            if doc.mime_type != "application/pdf":
-                logger.warning(
-                f"Document {doc.id} is not a PDF, cannot add watermark",
-                )
-            else :
-                mySignTest=SignDocument()
-                if not mySignTest.verif_already_published(doc.source_path):
-                    mySignTest.applyStamp(doc.source_path, inUrl="http://exemple.com", inChecksumValue="1d3sf1sd5165156156" )
-                    #mySignTest.applySignature(doc.source_path)
 
-                    doc.checksum = hashlib.md5(doc.source_path.read_bytes()).hexdigest()
-                    print(f"tampon ajouté sur {doc.id}")
-                    cf_doc.value_bool=False
-                    #Document.objects.filter(id=doc.id).update(modified=now())
-                    cf_doc.save()
-                    doc.save()
+    if CustomFieldInstance.objects.filter(document_id=doc.id,field_id=id_cf_publier.id).exists():
+        print(f"Document mis à jour : {doc.id} {doc.title}")
+        cf_doc=CustomFieldInstance.objects.get(document_id=doc.id,field_id=id_cf_publier.id)
+        if cf_doc.value_bool == True:
+            ## Ajouter contrôle date de publication
+            print("traitement de la publication")
+            try:
+                if doc.mime_type != "application/pdf":
+                    logger.warning(
+                    f"Document {doc.id} is not a PDF, cannot add watermark",
+                    )
+                else :
+                    mySignTest=SignDocument()
+                    if not mySignTest.verif_already_published(doc.source_path):
+                        mySignTest.applyStamp(doc.source_path, inUrl="http://exemple.com", inChecksumValue="1d3sf1sd5165156156" )
+                        #mySignTest.applySignature(doc.source_path)
 
-                    #Màj
-                    update_document_archive_file.delay(document_id=doc.id)
-                    bulk_update_documents([doc.id])
+                        doc.checksum = hashlib.md5(doc.source_path.read_bytes()).hexdigest()
+                        print(f"tampon ajouté sur {doc.id}")
+                        cf_doc.value_bool=False
+                        #Document.objects.filter(id=doc.id).update(modified=now())
 
-                    #Suppression du champ publier
-                    cf_doc.delete()
+                        #Suppression du champ publier
+                        cf_doc.delete()
 
-                    g_public, created = Group.objects.get_or_create(name='public')
-                    g_instructeur, created = Group.objects.get_or_create(name='instructeur')
-                    assign_perm("view_document", g_public, doc)
-                    assign_perm("view_document", g_instructeur, doc)
-                    remove_perm("change_document", g_instructeur, doc)
-                    doc.save()
+                        g_public, created = Group.objects.get_or_create(name='public')
+                        g_instructeur, created = Group.objects.get_or_create(name='instructeur')
+                        assign_perm("view_document", g_public, doc)
+                        assign_perm("view_document", g_instructeur, doc)
+                        remove_perm("change_document", g_instructeur, doc)
+                        #Màj
+                        update_document_archive_file(document_id=doc.id)
+                        bulk_update_documents([doc.id])
 
-        except Exception as e:
-            logger.exception(f"Error on trying add watermark on {doc.id}: {e}")
+
+    
+            except Exception as e:
+                logger.exception(f"Error on trying add watermark on {doc.id} :{e}")
 
 
 
