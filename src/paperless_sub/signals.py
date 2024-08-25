@@ -68,8 +68,10 @@ def mon_recepteur(sender, **kwargs):
                     )
                 else :
                     mySignTest=SignDocument()
+                    doc.checksum = hashlib.md5(doc.source_path.read_bytes()).hexdigest()
+
                     if not mySignTest.verif_already_published(doc.source_path):
-                        mySignTest.applyStamp(doc.source_path, inUrl="http://exemple.com", inChecksumValue="1d3sf1sd5165156156" )
+                        mySignTest.applyStamp(doc.source_path, inUrl="http://exemple.com", inChecksumValue=doc.checksum )
                         #mySignTest.applySignature(doc.source_path)
 
                         doc.checksum = hashlib.md5(doc.source_path.read_bytes()).hexdigest()
@@ -86,7 +88,7 @@ def mon_recepteur(sender, **kwargs):
                         assign_perm("view_document", g_instructeur, doc)
                         remove_perm("change_document", g_instructeur, doc)
                         #Màj
-                        update_document_archive_file(document_id=doc.id)
+                        update_document_archive_file.apply_async([doc.id], priority=0)
                         bulk_update_documents([doc.id])
 
 

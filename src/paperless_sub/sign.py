@@ -52,7 +52,8 @@ class SignDocument:
     #récupération des infos du certificat
     @classmethod
     def createSignerpkcs(self):
-        signer = signers.SimpleSigner.load_pkcs12(pfx_file=settings.CERT_PATH_FILE, passphrase=settings.CERT_PASSPHRASE) 
+        passphrase=bytes(settings.CERT_PASSPHRASE, encoding='utf-8')
+        signer = signers.SimpleSigner.load_pkcs12(pfx_file=settings.CERT_PATH_FILE, passphrase=passphrase) 
         if signer == None:
             print("Error while opening PFX file.")
         return signer
