@@ -15,6 +15,7 @@ from pyhanko.pdf_utils.reader import PdfFileReader
 from pyhanko.stamp import QRPosition,QRStampStyle,QRStamp
 from pikepdf import Pdf, Page
 from django.conf import settings
+from pyhanko.keys import load_cert_from_pemder
 
 logger = logging.getLogger("paperless.bulk_edit")
 
@@ -61,13 +62,15 @@ class SignDocument:
     # Settings for PAdES-LTA
     @classmethod
     def signatureMeta(self):
+        root_cert = load_cert_from_pemder(settings.ROOT_CERT)
+
         signature_meta = signers.PdfSignatureMetadata(
         field_name='Publication', md_algorithm='sha256',
         # Mark the signature as a PAdES signature
         subfilter=SigSeedSubFilter.PADES,
         # We'll also need a validation context
         # to fetch & embed revocation info.
-        validation_context=ValidationContext(allow_fetching=True),
+        validation_context=ValidationContext(allow_fetching=True,trust_roots=[root_cert]),
         # Embed relevant OCSP responses / CRLs (PAdES-LT)
         embed_validation_info=True,
         # Tell pyHanko to put in an extra DocumentTimeStamp
@@ -90,7 +93,7 @@ class SignDocument:
 
     #Application de la signature
     def applySignature(self,inFile):
-        
+        print(f"signature en cours sur {inFile}")
         with open(inFile, 'rb+') as inf:
             w = IncrementalPdfFileWriter(inf, strict = False)
             

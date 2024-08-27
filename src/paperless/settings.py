@@ -218,6 +218,17 @@ def _parse_beat_schedule() -> dict:
                 "expires": 23.0 * 60.0 * 60.0,
             },
         },
+        {
+            "name": "Unpublishing",
+            "env_key": "PAPERLESS_SUB_UNPUBLISHING_TASK_CRON",
+            # every minutes
+            "env_default": "*/1 * * * *",
+            "task": "paperless_sub.tasks.unpublishing",
+            "options": {
+                # 1 hour before default schedule sends again
+                "expires": 23.0 * 60.0 * 60.0,
+            },
+        },
     ]
     for task in tasks:
         # Either get the environment setting or use the default
@@ -1187,3 +1198,4 @@ STAMP_FONT=os.getenv("STAMP_FONT")
 #settings.SCRATCH_DIR
 MODEL=os.getenv("MODEL")
 BLANK=os.getenv("BLANK")
+ROOT_CERT=os.getenv("ROOT_CERT")

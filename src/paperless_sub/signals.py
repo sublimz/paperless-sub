@@ -2,6 +2,7 @@ from django.db.models.signals import m2m_changed
 from datetime import date, timedelta, timezone
 import re
 import hashlib
+import json
 from django.dispatch import receiver
 import logging
 from django.db.models.signals import pre_save, post_save
@@ -18,6 +19,9 @@ from guardian.shortcuts import assign_perm, remove_perm
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from documents.signals import document_updated, document_consumption_finished
+from django.contrib.auth.models import User
+from django.contrib.contenttypes.models import ContentType
+from paperless_sub.checks import check_dates_conformity, check_doc_type_conformity
 
 logger = logging.getLogger("paperless.handlers")
 
@@ -52,51 +56,67 @@ def task_postrun_handler(sender=consume_file, **kwargs):
 @receiver(document_updated)
 def mon_recepteur(sender, **kwargs):
     doc = kwargs.get('document')
-    # Traitez le document comme nécessaire
+
+    # Vérification et status du champ publier
     id_cf_publier=CustomField.objects.get(name='Publier')
-
     if CustomFieldInstance.objects.filter(document_id=doc.id,field_id=id_cf_publier.id).exists():
-        print(f"Document mis à jour : {doc.id} {doc.title}")
         cf_doc=CustomFieldInstance.objects.get(document_id=doc.id,field_id=id_cf_publier.id)
-        if cf_doc.value_bool == True:
-            ## Ajouter contrôle date de publication
-            print("traitement de la publication")
+        print(f"Document mis à jour : {doc.id} {doc.title} {doc.archive_path}")
+
+        # Document mis à jour et publier à vrai        
+        if cf_doc.value_bool == True:    
+            print(f"traitement de la publication pour {doc.id} {doc.archive_path}")
             try:
-                if doc.mime_type != "application/pdf":
-                    logger.warning(
-                    f"Document {doc.id} is not a PDF, cannot add watermark",
-                    )
-                else :
+                if check_dates_conformity(doc.id) and check_doc_type_conformity(doc.id):
                     mySignTest=SignDocument()
-                    doc.checksum = hashlib.md5(doc.source_path.read_bytes()).hexdigest()
+                    doc.checksum = hashlib.md5(doc.archive_path.read_bytes()).hexdigest()
 
-                    if not mySignTest.verif_already_published(doc.source_path):
-                        mySignTest.applyStamp(doc.source_path, inUrl="http://exemple.com", inChecksumValue=doc.checksum )
-                        #mySignTest.applySignature(doc.source_path)
+                    # on vérifie la signature
+                    if not mySignTest.verif_already_published(doc.archive_path):
+                        #on applique le timbre et on signe
+                        mySignTest.applyStamp(doc.archive_path, inUrl="http://exemple.com", inChecksumValue=doc.checksum )
+                        mySignTest.applySignature(doc.archive_path)
 
-                        doc.checksum = hashlib.md5(doc.source_path.read_bytes()).hexdigest()
-                        print(f"tampon ajouté sur {doc.id}")
-                        cf_doc.value_bool=False
+                        doc.checksum = hashlib.md5(doc.archive_path.read_bytes()).hexdigest()
+                        print(f"tampon ajouté sur {doc.id} {doc.archive_path}")
+                        
                         #Document.objects.filter(id=doc.id).update(modified=now())
 
                         #Suppression du champ publier
                         cf_doc.delete()
+                        
+                        #On ajoute le flag en ligne
+                        id_cf_online, created=CustomField.objects.get_or_create(name='En ligne',data_type="boolean")
+                        cf_online, created=CustomFieldInstance.objects.get_or_create(document_id=doc.id,field_id=id_cf_online.id)
+                        cf_online.value_bool=True
+                        cf_online.save()
 
+                        #Changement des permissions
                         g_public, created = Group.objects.get_or_create(name='public')
                         g_instructeur, created = Group.objects.get_or_create(name='instructeur')
                         assign_perm("view_document", g_public, doc)
                         assign_perm("view_document", g_instructeur, doc)
                         remove_perm("change_document", g_instructeur, doc)
+                        doc.owner = User.objects.get(username='admin')
+                        doc.save()
+
                         #Màj
-                        update_document_archive_file.apply_async([doc.id], priority=0)
-                        bulk_update_documents([doc.id])
+                        #content_type = ContentType.objects.get_for_model(Document)
+                        #log_entry = LogEntry.objects.create(object_id=doc.id,content_type=content_type,action=LogEntry.Action.UPDATE,changes=json.dumps(
+                        #    {
+                        #        "Publication": [doc.id, "None"],
+                        #    },
+                        #))
+                        #TODOS
+                        #Ajouter les shared links
 
+                        #doc.save.apply_async()
+                        #update_document_archive_file.apply_async([doc.id], priority=0)
+                        #bulk_update_documents.delay(doc.id)
+                        
 
-    
             except Exception as e:
                 logger.exception(f"Error on trying add watermark on {doc.id} :{e}")
-
-
 
 
                 #CustomFieldInstance.objects.get(document_id=1,field_id=3).delete()
