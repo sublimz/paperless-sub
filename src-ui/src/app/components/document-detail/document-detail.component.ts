@@ -75,6 +75,8 @@ import { DataType } from 'src/app/data/datatype'
 import { NgxExtendedPdfViewerModule, NgxExtendedPdfViewerService, pdfDefaultOptions } from 'ngx-extended-pdf-viewer';
 import { CookieService } from 'ngx-cookie-service';
 import { environment } from 'src/environments/environment';
+//////// Ajout
+import { TagService } from 'src/app/services/rest/tag.service'
 
 enum DocumentDetailNavIDs {
   Details = 1,
@@ -115,6 +117,11 @@ export class DocumentDetailComponent
   extends ComponentWithPermissions
   implements OnInit, OnDestroy, DirtyComponent
 {
+
+  /// Ajout sub
+  tags: Tag[]
+  filteredTags: Tag[]
+
   @ViewChild('inputTitle')
   titleInput: TextComponent
 
@@ -196,6 +203,8 @@ export class DocumentDetailComponent
 
   constructor(
     private documentsService: DocumentService,
+    /// Ajout
+    private tagService: TagService,
     private route: ActivatedRoute,
     private correspondentService: CorrespondentService,
     private documentTypeService: DocumentTypeService,
@@ -217,7 +226,6 @@ export class DocumentDetailComponent
   ) {
     super()
   }
-
 
   titleKeyUp(event) {
     this.titleSubject.next(event.target?.value)
@@ -322,6 +330,18 @@ export class DocumentDetailComponent
         .listAll()
         .pipe(first(), takeUntil(this.unsubscribeNotifier))
         .subscribe((result) => (this.users = result.results))
+    }
+    //////////////////Sub
+    if (
+      this.permissionsService.currentUserCan(
+        PermissionAction.View,
+        PermissionType.Tag
+      )
+    ) {
+      this.tagService
+        .listAll()
+        .pipe(first())
+        .subscribe((result) => (this.tags = result.results))
     }
 
     this.getCustomFields()
@@ -1221,6 +1241,9 @@ export class DocumentDetailComponent
       })
   }
 
+
+
+
   deletePages() {
     let modal = this.modalService.open(DeletePagesConfirmDialogComponent, {
       backdrop: 'static',
@@ -1319,6 +1342,13 @@ public setNewAnnotation() {
 
   }
 
+public filterTags() {
+    if (this.document?.tags) {
+      this.filteredTags = this.tags.filter((tag) =>
+        this.document.tags.includes(tag.id) // Assurez-vous que tag.id correspond à votre structure
+      )
+    }
+  }
 //////////////////////////////////////////////////////////////
 
 
