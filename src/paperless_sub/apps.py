@@ -30,10 +30,10 @@ class PaperlessSubConfig(AppConfig):
             logger.exception(f"Error on default Customs Fields creation: {e}")
 
         from django.contrib.auth.models import User, Permission, Group
-        
+
     # Création des permissions par défaut
         try:
-            g_model_instructeur, created = Group.objects.get_or_create(name='g_model_instructeur')
+            # droit instructeur
             view_uisettings_permission = Permission.objects.get(codename='view_uisettings', content_type__app_label='documents')
             view_document_permission = Permission.objects.get(codename='view_document', content_type__app_label='documents')
             add_document_permission = Permission.objects.get(codename='add_document', content_type__app_label='documents')  
@@ -45,7 +45,11 @@ class PaperlessSubConfig(AppConfig):
             view_logentry_permission = Permission.objects.get(codename='view_logentry', content_type__app_label='admin')
             view_sharelink_permission = Permission.objects.get(codename='view_sharelink', content_type__app_label='documents')
             view_customfield_permission = Permission.objects.get(codename='view_customfield', content_type__app_label='documents')
+            # droit administrateur
+            delete_document_permission = Permission.objects.get(codename='delete_document', content_type__app_label='documents')
 
+            # Instructeur
+            g_model_instructeur, created = Group.objects.get_or_create(name='g_model_instructeur')
             g_model_instructeur.permissions.add(view_uisettings_permission)
             g_model_instructeur.permissions.add(view_document_permission)
             g_model_instructeur.permissions.add(add_document_permission)
@@ -56,6 +60,19 @@ class PaperlessSubConfig(AppConfig):
             g_model_instructeur.permissions.add(view_logentry_permission)
             g_model_instructeur.permissions.add(view_sharelink_permission)
             g_model_instructeur.permissions.add(view_customfield_permission)
+            # Admin
+            g_model_admin, created = Group.objects.get_or_create(name='g_model_admin')
+            g_model_admin.permissions.add(view_uisettings_permission)
+            g_model_admin.permissions.add(view_document_permission)
+            g_model_admin.permissions.add(add_document_permission)
+            g_model_admin.permissions.add(change_document_permission)
+            g_model_admin.permissions.add(delete_document_permission)
+            g_model_admin.permissions.add(view_tag_permission)
+            g_model_admin.permissions.add(view_correspondent_permission)
+            g_model_admin.permissions.add(view_documenttype_permission)
+            g_model_admin.permissions.add(view_logentry_permission)
+            g_model_admin.permissions.add(view_sharelink_permission)
+            g_model_admin.permissions.add(view_customfield_permission)
 
 
         except Exception as e:  # pragma: no cover

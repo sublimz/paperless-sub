@@ -254,14 +254,19 @@ def correspondant_created(sender, instance, created, **kwargs):
       
         # Récupérer le groupe existant
         g_model_instructeur = Group.objects.get(name='g_model_instructeur')
+        g_model_admin= Group.objects.get(name='g_model_admin')
         # on supprimes les espaces et on ajoute gi_ en préfixe
-        g_instance_to_create = "gi_"+instance.name.replace(" ", "_")
-        g_instance_to_create_ok = g_instance_to_create.lower()
-        print(f"Un nouveau correspondant a été créé : {g_instance_to_create_ok}")
+        gi_instance_to_create = "gi_"+instance.name.replace(" ", "_")
+        ga_instance_to_create = "ga_"+instance.name.replace(" ", "_")
+        gi_instance_to_create_ok = gi_instance_to_create.lower()
+        ga_instance_to_create_ok = ga_instance_to_create.lower()
         # Créer un nouveau groupe
-        nouveau_groupe = Group.objects.create(name=g_instance_to_create_ok)
+        nouveau_groupe_i = Group.objects.create(name=gi_instance_to_create_ok)
+        nouveau_groupe_a = Group.objects.create(name=ga_instance_to_create_ok)
         # Copier les permissions de l'ancien groupe vers le nouveau
-        nouveau_groupe.permissions.set(g_model_instructeur.permissions.all())
+        nouveau_groupe_i.permissions.set(g_model_instructeur.permissions.all())
+        nouveau_groupe_a.permissions.set(g_model_admin.permissions.all())
         # Si vous avez d'autres attributs à copier, faites-le ici
         # Sauvegarder le nouveau groupe
-        nouveau_groupe.save()
+        nouveau_groupe_i.save()
+        nouveau_groupe_a.save()
