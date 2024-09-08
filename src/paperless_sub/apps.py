@@ -9,9 +9,10 @@ class PaperlessSubConfig(AppConfig):
 
         from paperless_sub import signals
         logger = logging.getLogger("paperless.tasks")
-        from documents.models import Tag
 
-    # Création des étiquettes par défaut
+        # Création des étiquettes par défaut
+        from documents.models import Tag
+    
         try:
             tag_en_ligne=Tag.objects.get_or_create(name='En ligne')
             tag_archive=Tag.objects.get_or_create(name='Archive')
@@ -19,9 +20,20 @@ class PaperlessSubConfig(AppConfig):
         except Exception as e:  # pragma: no cover
             logger.exception(f"Error on default Tag creation: {e}")
 
-        from documents.models import CustomField
+        # Création des Data type par défaut
+        from documents.models import DocumentType
 
-    # Création des Customs Fieds par défaut
+        try:
+            arr, created=DocumentType.objects.get_or_create(name='Arrêtés')
+            dec, created=DocumentType.objects.get_or_create(name='Décisions')
+            deli, created=DocumentType.objects.get_or_create(name='Délibérations')
+            autre, created=DocumentType.objects.get_or_create(name='Autre')
+        except Exception as e:  # pragma: no cover
+            logger.exception(f"Error on default Document type creation: {e}")
+
+        
+        # Création des Customs Fieds par défaut
+        from documents.models import CustomField
         try:
             dp, created=CustomField.objects.get_or_create(name='Date de début de publication',data_type='date')
             fp, created=CustomField.objects.get_or_create(name='Date de fin de publication',data_type='date')
@@ -32,6 +44,8 @@ class PaperlessSubConfig(AppConfig):
         from django.contrib.auth.models import User, Permission, Group
 
     # Création des permissions par défaut
+        from django.contrib.auth.models import User, Permission, Group
+
         try:
             # droit instructeur
             view_uisettings_permission = Permission.objects.get(codename='view_uisettings', content_type__app_label='documents')
