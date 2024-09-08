@@ -47,7 +47,7 @@ class PaperlessSubConfig(AppConfig):
         from django.contrib.auth.models import User, Permission, Group
 
         try:
-            # droit instructeur
+            # droit instructeur et/ou public
             view_uisettings_permission = Permission.objects.get(codename='view_uisettings', content_type__app_label='documents')
             view_document_permission = Permission.objects.get(codename='view_document', content_type__app_label='documents')
             add_document_permission = Permission.objects.get(codename='add_document', content_type__app_label='documents')  
@@ -87,11 +87,28 @@ class PaperlessSubConfig(AppConfig):
             g_model_admin.permissions.add(view_logentry_permission)
             g_model_admin.permissions.add(view_sharelink_permission)
             g_model_admin.permissions.add(view_customfield_permission)
-
+            # Public
+            g_model_public, created = Group.objects.get_or_create(name='g_model_public')
+            g_model_public.permissions.add(view_uisettings_permission)
+            g_model_public.permissions.add(view_document_permission)
 
         except Exception as e:  # pragma: no cover
             logger.exception(f"Error on default Group creation: {e}")
 
+
+        from django.contrib.auth.models import User
+
+        try:
+            public_user, created = User.objects.get_or_create(username='public', is_active=True)
+            if created :
+                public_user.set_password('public')
+                public_user.save()
+            consumer_anonyme_user, created = User.objects.get_or_create(username='consumer_anonyme', is_active=True)
+            if created :
+                consumer_anonyme_user.set_password('consumer_anonyme')
+                consumer_anonyme_user.save()
+        except Exception as e:  # pragma: no cover
+            logger.exception(f"Error on default Users creation: {e}")
 
 
 
@@ -116,7 +133,7 @@ class PaperlessSubConfig(AppConfig):
 #                    first_name='consumer_anonyme',
 #                    last_name='consumer_anonyme',
 #                    password='consumer_anonyme_sub',
-#                    is_active=True
+#                    i_active=Trues
 #                )
 #                system_user_1.user_permissions.add(add_document_permission)
 #
@@ -144,25 +161,7 @@ class PaperlessSubConfig(AppConfig):
 #                view_document_permission = Permission.objects.get(codename='view_document', content_type__app_label='documents')  
 #                public_group, created = Group.objects.get_or_create(name='public')
 #                public_group.permissions.add(view_uisettings_permission, view_document_permission)    
-#
-#            if not CustomField.objects.filter(name='Date de début de publication').exists():
-#                CustomField.objects.get_or_create(name='Date de début de publication',data_type='date')
-#
-#            if not CustomField.objects.filter(name='Date de fin de publication').exists():
-#                CustomField.objects.get_or_create(name='Date de fin de publication',data_type='date')
-#
-#            if not CustomField.objects.filter(name='A publier').exists():
-#                CustomField.objects.get_or_create(name='A publier',data_type='boolean')            
-#
-#            
-#            if not Workflow.objects.filter(name='[SUB] ajoute champ perso date debut pub et date fin pub').exists():
-#                Workflow.objects.get_or_create(name='[SUB] ajoute champ perso date debut pub et date fin pub',order=1,enabled=1)
-#                WorkflowAction.objects.get_or_create(workflow_id=1,workflowaction_id=1)
-#                WorkflowTrigger.objects.get_or_create(workflow_id=1,workflowtrigger_id=1)
-#
-#
-#        except:
-#            pass
+
 
 
         AppConfig.ready(self)
