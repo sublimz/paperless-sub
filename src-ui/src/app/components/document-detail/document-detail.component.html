@@ -138,11 +138,13 @@
                       [horizontal]="true"
                       [error]="getCustomFieldError(i)"></pngx-input-text>
                     }
+
+                    <!-- SUB: ajout de removable false au lieu de [removable]="userIsOwner" -->
+
                     @case (CustomFieldDataType.Date) {
                       <pngx-input-date formControlName="value"
                       [title]="getCustomFieldFromInstance(fieldInstance)?.name"
-                      [removable]="userIsOwner"
-                      (removed)="removeField(fieldInstance)"
+                      [removable]="false"
                       [horizontal]="true"
                       [error]="getCustomFieldError(i)"></pngx-input-date>
                     }
@@ -174,11 +176,11 @@
                       [horizontal]="true"
                       [error]="getCustomFieldError(i)"></pngx-input-monetary>
                     }
+                    <!-- SUB: ajout de removable false au lieu de [removable]="userIsOwner" -->
                     @case (CustomFieldDataType.Boolean) {
                       <pngx-input-check formControlName="value"
                       [title]="getCustomFieldFromInstance(fieldInstance)?.name"
-                      [removable]="userIsOwner"
-                      (removed)="removeField(fieldInstance)"
+                      [removable]="false"
                       [horizontal]="true"></pngx-input-check>
                     }
                     @case (CustomFieldDataType.Url) {

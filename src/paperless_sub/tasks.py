@@ -16,8 +16,8 @@ def unpublishing():
     try:
         dp, created=CustomField.objects.get_or_create(name='Date de début de publication',data_type='date')
         fp, created=CustomField.objects.get_or_create(name='Date de fin de publication',data_type='date')
-        id_cf_online, created=CustomField.objects.get_or_create(name='En ligne',data_type='boolean')
-        q=CustomField.objects.filter(name='En ligne')
+        id_cf_online, created=CustomField.objects.get_or_create(name='Publier',data_type='boolean')
+        q=CustomField.objects.filter(name='Publier')
         document_en_ligne=CustomFieldInstance.objects.filter(field_id__in=q, value_bool=True)
 
         #document_en_ligne=CustomFieldInstance.objects.filter(field_id__in=id_cf_online, value_bool=True)

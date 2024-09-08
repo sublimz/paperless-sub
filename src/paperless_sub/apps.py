@@ -1,3 +1,4 @@
+import logging
 from django.apps import AppConfig
 
 class PaperlessSubConfig(AppConfig):
@@ -7,11 +8,65 @@ class PaperlessSubConfig(AppConfig):
     def ready(self):
 
         from paperless_sub import signals
+        logger = logging.getLogger("paperless.tasks")
+        from documents.models import Tag
+
+    # Création des étiquettes par défaut
+        try:
+            tag_en_ligne=Tag.objects.get_or_create(name='En ligne')
+            tag_archive=Tag.objects.get_or_create(name='Archive')
+            tag_archive=Tag.objects.get_or_create(name='Nouveau')
+        except Exception as e:  # pragma: no cover
+            logger.exception(f"Error on default Tag creation: {e}")
+
+        from documents.models import CustomField
+
+    # Création des Customs Fieds par défaut
+        try:
+            dp, created=CustomField.objects.get_or_create(name='Date de début de publication',data_type='date')
+            fp, created=CustomField.objects.get_or_create(name='Date de fin de publication',data_type='date')
+            id_cf_online, created=CustomField.objects.get_or_create(name='Publier',data_type='boolean')
+        except Exception as e:  # pragma: no cover
+            logger.exception(f"Error on default Customs Fields creation: {e}")
+
+        from django.contrib.auth.models import User, Permission, Group
+        
+    # Création des permissions par défaut
+        try:
+            g_model_instructeur, created = Group.objects.get_or_create(name='g_model_instructeur')
+            view_uisettings_permission = Permission.objects.get(codename='view_uisettings', content_type__app_label='documents')
+            view_document_permission = Permission.objects.get(codename='view_document', content_type__app_label='documents')
+            add_document_permission = Permission.objects.get(codename='add_document', content_type__app_label='documents')  
+            change_document_permission = Permission.objects.get(codename='change_document', content_type__app_label='documents')
+            view_tag_permission = Permission.objects.get(codename='view_tag', content_type__app_label='documents')
+            view_correspondent_permission = Permission.objects.get(codename='view_correspondent', content_type__app_label='documents')
+            view_documenttype_permission = Permission.objects.get(codename='view_documenttype', content_type__app_label='documents')
+            view_paperlesstask_permission = Permission.objects.get(codename='view_paperlesstask', content_type__app_label='documents')
+            view_logentry_permission = Permission.objects.get(codename='view_logentry', content_type__app_label='admin')
+            view_sharelink_permission = Permission.objects.get(codename='view_sharelink', content_type__app_label='documents')
+            view_customfield_permission = Permission.objects.get(codename='view_customfield', content_type__app_label='documents')
+
+            g_model_instructeur.permissions.add(view_uisettings_permission)
+            g_model_instructeur.permissions.add(view_document_permission)
+            g_model_instructeur.permissions.add(add_document_permission)
+            g_model_instructeur.permissions.add(change_document_permission)
+            g_model_instructeur.permissions.add(view_tag_permission)
+            g_model_instructeur.permissions.add(view_correspondent_permission)
+            g_model_instructeur.permissions.add(view_documenttype_permission)
+            g_model_instructeur.permissions.add(view_logentry_permission)
+            g_model_instructeur.permissions.add(view_sharelink_permission)
+            g_model_instructeur.permissions.add(view_customfield_permission)
+
+
+        except Exception as e:  # pragma: no cover
+            logger.exception(f"Error on default Group creation: {e}")
+
+
 
 
 #        from django.dispatch import receiver
 #        from django.db import DatabaseError, OperationalError
-#        from django.contrib.auth.models import User, Permission, Group
+#from django.contrib.auth.models import User, Permission, Group
 #        from django.contrib.contenttypes.models import ContentType
 #        from documents.models import User as DocumentUser
 #        from documents.models import CustomField

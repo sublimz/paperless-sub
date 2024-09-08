@@ -10,6 +10,7 @@ from documents.models import Document
 from documents.models import Tag
 from documents.models import CustomField
 from documents.models import CustomFieldInstance
+from documents.models import Correspondent
 from documents.tasks import consume_file,bulk_update_documents,update_document_archive_file
 from celery import shared_task
 from celery.signals import task_postrun
@@ -26,7 +27,9 @@ from paperless_sub.checks import check_dates_conformity, check_doc_type_conformi
 
 logger = logging.getLogger("paperless.handlers")
 
-#Après ajout du doc initialisation des valeurs
+"""
+Ajout d'un document : initialisation des valeurs pour la publication à venir
+"""
 @task_postrun.connect
 def task_postrun_handler(sender=consume_file, **kwargs):
     print(f"-------------------  Tâche terminée : --{sender.name}- result:--{kwargs['retval']}--")
@@ -55,18 +58,10 @@ def task_postrun_handler(sender=consume_file, **kwargs):
             cp.save()
 
 
-"""
-@receiver(m2m_changed, sender=Document.tags.through)
-def handle_tags_change(sender, **kwargs):
-    print(f"tags_changed {sender} {kwargs['action']}")
-    if kwargs['action']=="pre_add":
-        instance = kwargs['instance']  # Récupérer l'instance
-        document_id = instance.id      # Accéder à l'ID de l'objet Document
-        print(document_id)
-        doc=Document.objects.get(id=document_id)
-        print(f"Document tags {doc.tags.all()}") 
-"""
 
+"""
+Changement des étiquettes : modification en masse à écrire
+"""
 @receiver(m2m_changed, sender=Document.tags.through)
 def handle_tags_change(sender, instance, action, **kwargs):
     if action == "pre_add":
@@ -133,16 +128,16 @@ def handle_tags_change(sender, instance, action, **kwargs):
 #    # Retourne True si des entrées sont trouvées, sinon False
 #    return log_entries.exists()
 
-
-
-
+"""
+Mise à jour d'un document : vérification de si il est à publier
+"""
 @receiver(document_updated)
 def mon_recepteur(sender, **kwargs):
     doc = kwargs.get('document')
 
     # Vérification et statut du champ publier
     id_cf_publier=CustomField.objects.get(name='Publier')
-    
+
     # On récupère la liste des tags
     current_tag_ids = doc.tags.values_list('id', flat=True)
     current_tags = Tag.objects.filter(id__in=current_tag_ids).values_list('name', flat=True)
@@ -249,3 +244,24 @@ def mon_recepteur(sender, **kwargs):
 #            if eid_list is None:
 #                print("----- jamais publier, on va publier")
 #
+
+
+@receiver(post_save, sender=Correspondent)
+def correspondant_created(sender, instance, created, **kwargs):
+    if created:
+        # Code à exécuter après la création de l'objet Correspondent
+        print(f"Un nouveau correspondant a été créé : {instance.id} {instance.name}")
+      
+        # Récupérer le groupe existant
+        g_model_instructeur = Group.objects.get(name='g_model_instructeur')
+        # on supprimes les espaces et on ajoute gi_ en préfixe
+        g_instance_to_create = "gi_"+instance.name.replace(" ", "_")
+        g_instance_to_create_ok = g_instance_to_create.lower()
+        print(f"Un nouveau correspondant a été créé : {g_instance_to_create_ok}")
+        # Créer un nouveau groupe
+        nouveau_groupe = Group.objects.create(name=g_instance_to_create_ok)
+        # Copier les permissions de l'ancien groupe vers le nouveau
+        nouveau_groupe.permissions.set(g_model_instructeur.permissions.all())
+        # Si vous avez d'autres attributs à copier, faites-le ici
+        # Sauvegarder le nouveau groupe
+        nouveau_groupe.save()
