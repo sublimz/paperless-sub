@@ -1,5 +1,6 @@
 from django.db.models.signals import m2m_changed
 from datetime import date, timedelta, timezone
+from unidecode import unidecode
 import re
 import hashlib
 import json
@@ -251,21 +252,26 @@ def correspondant_created(sender, instance, created, **kwargs):
     if created:
         # Code à exécuter après la création de l'objet Correspondent
         print(f"Un nouveau correspondant a été créé : {instance.id} {instance.name}")
-      
+        
         # Récupérer le groupe existant
         g_model_instructeur = Group.objects.get(name='g_model_instructeur')
         g_model_admin= Group.objects.get(name='g_model_admin')
         # on supprimes les espaces et on ajoute gi_ en préfixe
         gi_instance_to_create = "gi_"+instance.name.replace(" ", "_")
         ga_instance_to_create = "ga_"+instance.name.replace(" ", "_")
-        gi_instance_to_create_ok = gi_instance_to_create.lower()
-        ga_instance_to_create_ok = ga_instance_to_create.lower()
+        gi_instance_to_create_ok = unidecode(gi_instance_to_create.lower())
+        ga_instance_to_create_ok = unidecode(ga_instance_to_create.lower())
         # Créer un nouveau groupe
-        nouveau_groupe_i = Group.objects.create(name=gi_instance_to_create_ok)
-        nouveau_groupe_a = Group.objects.create(name=ga_instance_to_create_ok)
+        nouveau_groupe_i, created = Group.objects.get_or_create(name=gi_instance_to_create_ok)
+        nouveau_groupe_a, created = Group.objects.get_or_create(name=ga_instance_to_create_ok)
         # Copier les permissions de l'ancien groupe vers le nouveau
         nouveau_groupe_i.permissions.set(g_model_instructeur.permissions.all())
         nouveau_groupe_a.permissions.set(g_model_admin.permissions.all())
+
+        view_correspondent_permission = Permission.objects.get(codename='view_correspondent', content_type__app_label='documents')
+
+        assign_perm('view_correspondent', nouveau_groupe_i, instance)
+        instance.save()
         # Si vous avez d'autres attributs à copier, faites-le ici
         # Sauvegarder le nouveau groupe
         nouveau_groupe_i.save()
