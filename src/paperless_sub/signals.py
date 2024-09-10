@@ -25,6 +25,8 @@ from documents.signals import document_updated, document_consumption_finished
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from paperless_sub.checks import check_dates_conformity, check_doc_type_conformity
+from documents.permissions import get_objects_for_user_owner_aware
+from documents.permissions import set_permissions_for_object
 
 logger = logging.getLogger("paperless.handlers")
 
@@ -35,7 +37,7 @@ Ajout d'un document : initialisation des valeurs pour la publication à venir
 def task_postrun_handler(sender=consume_file, **kwargs):
     print(f"-------------------  Tâche terminée : --{sender.name}- result:--{kwargs['retval']}--")
     match = re.search(r"(?<=Success\. New document id )\d+(?= created)", str(kwargs['retval']))
-        
+
     if match:
         doc_id = int(match.group())
         print(f"{doc_id} de type {type(doc_id)}")
@@ -128,6 +130,7 @@ def handle_tags_change(sender, instance, action, **kwargs):
 #
 #    # Retourne True si des entrées sont trouvées, sinon False
 #    return log_entries.exists()
+#
 
 """
 Mise à jour d'un document : vérification de si il est à publier
@@ -179,14 +182,27 @@ def mon_recepteur(sender, **kwargs):
                         #cf_online, created=CustomFieldInstance.objects.get_or_create(document_id=doc.id,field_id=id_cf_online.id)
                         #cf_online.value_bool=True
                         #cf_online.save()
-
-                        #Changement des permissions
-                        g_public, created = Group.objects.get_or_create(name='public')
-                        g_instructeur, created = Group.objects.get_or_create(name='instructeur')
-                        assign_perm("view_document", g_public, doc)
-                        assign_perm("view_document", g_instructeur, doc)
-                        remove_perm("change_document", g_instructeur, doc)
+     
                         doc.owner = User.objects.get(username='admin')
+
+                        #Reconstituion du groupe gi du correspondant et assignation du groupe au correspondant
+                        correspondant= Correspondent.objects.get(id=doc.correspondent_id)
+                        correspondant_normalized=unidecode(correspondant.name.lower().replace(" ", "_"))
+                        gi_name=f'{doc.correspondent_id}_gi_{correspondant_normalized}'
+                        group_gi_name, created=Group.objects.get_or_create(name=gi_name)
+                        assign_perm('view_correspondent',group_gi_name,correspondant)
+
+
+                        #print(f"Permission 'view_correspondent' assignée au groupe --{gi_name}-- sur l'objet {correspondant}.")
+                        #Changement des permissions
+                        #### A vérifier, changer les droits pour que le correspondant ne soit qu'en visu après publication
+                        g_public, created = Group.objects.get_or_create(name='g_model_public')
+                        g_instructeur, created = Group.objects.get_or_create(name='g_model_instructeur')
+                        assign_perm('view_document', g_public, doc)
+                        assign_perm('view_document', g_instructeur, doc)
+                        assign_perm('view_document', group_gi_name, doc)
+
+                        remove_perm('change_document', g_instructeur, doc)
                         doc.save()
 
                         #Màj
@@ -246,33 +262,30 @@ def mon_recepteur(sender, **kwargs):
 #                print("----- jamais publier, on va publier")
 #
 
-
+""" Création des groupes de droits lors de la création du correspondant """
 @receiver(post_save, sender=Correspondent)
 def correspondant_created(sender, instance, created, **kwargs):
     if created:
-        # Code à exécuter après la création de l'objet Correspondent
-        print(f"Un nouveau correspondant a été créé : {instance.id} {instance.name}")
-        
-        # Récupérer le groupe existant
+        print(f"Un nouveau correspondant a été créé : {instance.id} {instance.name} {instance.name.lower()}")
+
         g_model_instructeur = Group.objects.get(name='g_model_instructeur')
         g_model_admin= Group.objects.get(name='g_model_admin')
-        # on supprimes les espaces et on ajoute gi_ en préfixe
-        gi_instance_to_create = "gi_"+instance.name.replace(" ", "_")
-        ga_instance_to_create = "ga_"+instance.name.replace(" ", "_")
-        gi_instance_to_create_ok = unidecode(gi_instance_to_create.lower())
-        ga_instance_to_create_ok = unidecode(ga_instance_to_create.lower())
-        # Créer un nouveau groupe
-        nouveau_groupe_i, created = Group.objects.get_or_create(name=gi_instance_to_create_ok)
-        nouveau_groupe_a, created = Group.objects.get_or_create(name=ga_instance_to_create_ok)
-        # Copier les permissions de l'ancien groupe vers le nouveau
+        ## on supprimes les espaces et on ajoute gi_ en préfixe
+        name_gi_instance = f'{instance.id}'+"_gi_"+instance.name.lower().replace(" ", "_")
+        name_ga_instance = f'{instance.id}'+"_ga_"+instance.name.lower().replace(" ", "_")
+        
+        nouveau_groupe_i, created = Group.objects.get_or_create(name=name_gi_instance)
+        nouveau_groupe_a, created = Group.objects.get_or_create(name=name_ga_instance)
+        ## Copier les permissions du groupe modèle vers le nouveau
         nouveau_groupe_i.permissions.set(g_model_instructeur.permissions.all())
         nouveau_groupe_a.permissions.set(g_model_admin.permissions.all())
 
-        view_correspondent_permission = Permission.objects.get(codename='view_correspondent', content_type__app_label='documents')
+## l'affectation ne fonctionne pas ici !!!
+## l'affectation est effecutée au niveau de la mise à jour du document, à revoir
+        assign_perm('view_correspondent',nouveau_groupe_i,instance)
+        assign_perm('change_correspondent',nouveau_groupe_a,instance)
 
-        assign_perm('view_correspondent', nouveau_groupe_i, instance)
-        instance.save()
-        # Si vous avez d'autres attributs à copier, faites-le ici
-        # Sauvegarder le nouveau groupe
-        nouveau_groupe_i.save()
-        nouveau_groupe_a.save()
+##        #>>> objet = Correspondent.objects.get(id=52)
+##        #>>> groupe = Group.objects.get(id=90)
+##        #>>> assign_perm('change_correspondent',groupe,objet)
+##        #<GroupObjectPermission: A6 | gi_a6 | change_correspondent>

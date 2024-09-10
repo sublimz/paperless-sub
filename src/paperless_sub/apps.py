@@ -74,6 +74,7 @@ class PaperlessSubConfig(AppConfig):
             g_model_instructeur.permissions.add(view_logentry_permission)
             g_model_instructeur.permissions.add(view_sharelink_permission)
             g_model_instructeur.permissions.add(view_customfield_permission)
+            g_model_instructeur.permissions.add(view_paperlesstask_permission)
             # Admin
             g_model_admin, created = Group.objects.get_or_create(name='g_model_admin')
             g_model_admin.permissions.add(view_uisettings_permission)
@@ -87,6 +88,7 @@ class PaperlessSubConfig(AppConfig):
             g_model_admin.permissions.add(view_logentry_permission)
             g_model_admin.permissions.add(view_sharelink_permission)
             g_model_admin.permissions.add(view_customfield_permission)
+            g_model_admin.permissions.add(view_paperlesstask_permission)
             # Public
             g_model_public, created = Group.objects.get_or_create(name='g_model_public')
             g_model_public.permissions.add(view_uisettings_permission)
