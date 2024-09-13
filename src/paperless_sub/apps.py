@@ -26,7 +26,7 @@ class PaperlessSubConfig(AppConfig):
 
     def perform_checks(self):
         # Ajoutez votre logique de vérification ici
-        print("Les migrations ont été appliquées. Effectuez vos vérifications.")
+        print("migrations was applied, adding default settings")
 
         from paperless_sub import signals
         logger = logging.getLogger("paperless.tasks")
