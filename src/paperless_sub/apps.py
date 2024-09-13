@@ -1,11 +1,27 @@
 import logging
 from django.apps import AppConfig
+from django.db import connection
 
 class PaperlessSubConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'paperless_sub'
 
     def ready(self):
+        # Vérifiez si les migrations ont été appliquées
+        if self.check_migrations_applied():
+            # Effectuez vos vérifications ici
+            self.perform_checks()
+
+    def check_migrations_applied(self):
+        # Vérifiez si la base de données est synchronisée avec les migrations
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT COUNT(*) FROM django_migrations")
+            migration_count = cursor.fetchone()[0]
+            return migration_count > 0
+
+    def perform_checks(self):
+        # Ajoutez votre logique de vérification ici
+        print("Les migrations ont été appliquées. Effectuez vos vérifications.")
 
         from paperless_sub import signals
         logger = logging.getLogger("paperless.tasks")
