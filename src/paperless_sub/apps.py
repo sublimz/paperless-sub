@@ -14,10 +14,14 @@ class PaperlessSubConfig(AppConfig):
 
     def check_migrations_applied(self):
         # Vérifiez si la base de données est synchronisée avec les migrations
-        with connection.cursor() as cursor:
-            cursor.execute("SELECT COUNT(*) FROM django_migrations")
-            migration_count = cursor.fetchone()[0]
-            return migration_count > 0
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT COUNT(*) FROM django_migrations")
+                migration_count = cursor.fetchone()[0]
+                return migration_count > 0
+        except OperationalError:
+            # La table django_migrations n'existe pas, donc pas de migrations appliquées
+            return False
 
     def perform_checks(self):
         # Ajoutez votre logique de vérification ici
