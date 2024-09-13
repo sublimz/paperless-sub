@@ -1,6 +1,7 @@
 import logging
 from django.apps import AppConfig
 from django.db import connection
+from django.db.utils import OperationalError
 
 class PaperlessSubConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
