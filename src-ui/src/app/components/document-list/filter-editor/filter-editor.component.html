@@ -85,6 +85,7 @@
           shortcutKey="i"></pngx-filterable-dropdown>
         }
 
+      <!-- SUB: Retirer les customs fields de la liste d'affichage des documents" 
         @if (permissionsService.currentUserCan(PermissionAction.View, PermissionType.CustomField) && customFields.length > 0) {
           <pngx-filterable-dropdown class="flex-fill" title="Custom fields" icon="ui-radios" i18n-title
           filterPlaceholder="Filter custom fields" i18n-filterPlaceholder
@@ -96,6 +97,7 @@
           [documentCounts]="customFieldDocumentCounts"
           [allowSelectNone]="true"></pngx-filterable-dropdown>
         }
+      -->
         <pngx-dates-dropdown
           title="Dates" i18n-title
           (datesSet)="updateRules()"

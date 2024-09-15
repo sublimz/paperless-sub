@@ -88,6 +88,8 @@ def add_tag(doc_ids: list[int], tag: int):
     qs = Document.objects.filter(Q(id__in=doc_ids) & ~Q(tags__id=tag)).only("pk")
     affected_docs = list(qs.values_list("pk", flat=True))
 
+    print(f"Ajout des tags")
+
     DocumentTagRelationship = Document.tags.through
 
     DocumentTagRelationship.objects.bulk_create(
@@ -117,6 +119,8 @@ def remove_tag(doc_ids: list[int], tag: int):
 def modify_tags(doc_ids: list[int], add_tags: list[int], remove_tags: list[int]):
     qs = Document.objects.filter(id__in=doc_ids).only("pk")
     affected_docs = list(qs.values_list("pk", flat=True))
+
+    print(f"Modifications des tags")
 
     DocumentTagRelationship = Document.tags.through
 

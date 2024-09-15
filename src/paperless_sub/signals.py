@@ -24,9 +24,10 @@ from django.contrib import messages
 from documents.signals import document_updated, document_consumption_finished
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
-from paperless_sub.checks import check_dates_conformity, check_doc_type_conformity
+from paperless_sub.checks import check_dates_conformity, check_doc_type_conformity, check_correspondent_not_null, check_documenttype_not_null
 from documents.permissions import get_objects_for_user_owner_aware
 from documents.permissions import set_permissions_for_object
+from paperless_sub.checks import CheckPublish
 
 logger = logging.getLogger("paperless.handlers")
 
@@ -61,9 +62,16 @@ def task_postrun_handler(sender=consume_file, **kwargs):
             cp.save()
 
 
+"""
+Changement des étiquettes en masse
+"""
+@receiver(post_save, sender=Document.tags.through)
+def bulk_tag_change(sender, instance, created, **kwargs):
+    print(f"Changement des étiquettes en masse a été créé : {instance.id} {instance.name} {instance.name.lower()}")
+
 
 """
-Changement des étiquettes : modification en masse à écrire
+Changement d'une étiquette : modification à écrire ?, en fait en bulk edit, ce signal n'est pas envoyé
 """
 @receiver(m2m_changed, sender=Document.tags.through)
 def handle_tags_change(sender, instance, action, **kwargs):
@@ -81,18 +89,13 @@ def handle_tags_change(sender, instance, action, **kwargs):
         print("Tags à ajouter :", list(new_tags))
         print("Tags déjà associés :", list(current_tags))
 
-        if None in current_tags:
-            print("instance.notag()")
+        #if not current_tags:
+        #    print("instance.notag()")
 
         # Vérifier les conditions
         # Si à instruire vers en ligne
-        if "A instruire" in current_tags and "En ligne" in new_tags:
-            if "Archive" not in current_tags and "Archive" not in new_tags:
-                print("instance.stamp()")  # Appeler la méthode stamp()
-                tag_a_instruire = Tag.objects.get(name="A instruire")
-                tag_nouveau = Tag.objects.get(name="Nouveau")
-                instance.tags.remove(tag_a_instruire)
-                instance.tags.remove(tag_nouveau)
+        if not current_tags and "En ligne" in new_tags:
+            print("ON PUBLIE")  # Appeler la méthode stamp()
                 
 
 
@@ -154,7 +157,7 @@ def mon_recepteur(sender, **kwargs):
         if cf_doc.value_bool == True:    
             print(f"traitement de la publication pour {doc.id} {doc.archive_path}")
             try:
-                if check_dates_conformity(doc.id) and check_doc_type_conformity(doc.id) and "Archive" not in current_tags and "En ligne" not in current_tags :
+                if check_dates_conformity(doc.id) and check_doc_type_conformity(doc.id) and check_correspondent_not_null(doc.id) and check_documenttype_not_null(doc.id) and "Archive" not in current_tags and "En ligne" not in current_tags :
                     mySignTest=SignDocument()
                     doc.checksum = hashlib.md5(doc.archive_path.read_bytes()).hexdigest()
 
@@ -261,6 +264,7 @@ def mon_recepteur(sender, **kwargs):
 #            if eid_list is None:
 #                print("----- jamais publier, on va publier")
 #
+
 
 """ Création des groupes de droits lors de la création du correspondant """
 @receiver(post_save, sender=Correspondent)

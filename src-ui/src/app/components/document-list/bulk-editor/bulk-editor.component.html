@@ -17,6 +17,7 @@
         </div>
         <div class="d-flex align-items-center gap-2" *pngxIfPermissions="{ action: PermissionAction.Change, type: PermissionType.Document }">
           <label class="me-2" i18n>Edit:</label>
+          <!-- SUB: Retirer les tags des actions en masse possibles sur des documents"   
           @if (permissionService.currentUserCan(PermissionAction.View, PermissionType.Tag)) {
             <pngx-filterable-dropdown title="Tags" icon="tag-fill" i18n-title
               filterPlaceholder="Filter tags" i18n-filterPlaceholder
@@ -33,6 +34,7 @@
               shortcutKey="t">
             </pngx-filterable-dropdown>
           }
+          -->
           @if (permissionService.currentUserCan(PermissionAction.View, PermissionType.Correspondent)) {
             <pngx-filterable-dropdown title="Correspondent" icon="person-fill" i18n-title
               filterPlaceholder="Filter correspondents" i18n-filterPlaceholder
@@ -78,6 +80,7 @@
               shortcutKey="i">
             </pngx-filterable-dropdown>
           }
+        <!-- SUB: Retirer les customs fields des actions en masse possibles sur des documents
           @if (permissionService.currentUserCan(PermissionAction.View, PermissionType.CustomField)) {
             <pngx-filterable-dropdown title="Custom fields" icon="ui-radios" i18n-title
               filterPlaceholder="Filter custom fields" i18n-filterPlaceholder
@@ -93,6 +96,7 @@
               (apply)="setCustomFields($event)">
             </pngx-filterable-dropdown>
           }
+          -->
         </div>
         <div class="d-flex align-items-center gap-2 ms-auto">
           <div class="btn-toolbar">
