@@ -199,7 +199,7 @@ def mon_recepteur(sender, **kwargs):
                         #print(f"Permission 'view_correspondent' assignée au groupe --{gi_name}-- sur l'objet {correspondant}.")
                         #Changement des permissions
                         #### A vérifier, changer les droits pour que le correspondant ne soit qu'en visu après publication
-                        g_public, created = Group.objects.get_or_create(name='g_model_public')
+                        g_public, created = Group.objects.get_or_create(name='g_public')
                         g_instructeur, created = Group.objects.get_or_create(name='g_model_instructeur')
                         assign_perm('view_document', g_public, doc)
                         assign_perm('view_document', g_instructeur, doc)
