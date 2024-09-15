@@ -12,7 +12,7 @@ from documents.models import Tag
 from django.contrib.auth.models import User, Permission, Group
 from guardian.shortcuts import assign_perm, remove_perm
 
-#@shared_task
+@shared_task
 def unpublishing():
     try:
         dp, created=CustomField.objects.get_or_create(name='Date de début de publication',data_type='date')

@@ -111,10 +111,9 @@ class PaperlessSubConfig(AppConfig):
             g_model_admin.permissions.add(view_customfield_permission)
             g_model_admin.permissions.add(view_paperlesstask_permission)
             # Public
-            g_model_public, created = Group.objects.get_or_create(name='g_model_public')
-            g_model_public.permissions.add(view_uisettings_permission)
-            g_model_public.permissions.add(view_document_permission)
-
+            g_public, created = Group.objects.get_or_create(name='g_public')
+            g_public.permissions.add(view_uisettings_permission)
+            g_public.permissions.add(view_document_permission)
         except Exception as e:  # pragma: no cover
             logger.exception(f"Error on default Group creation: {e}")
 
@@ -125,6 +124,7 @@ class PaperlessSubConfig(AppConfig):
             public_user, created = User.objects.get_or_create(username='public', is_active=True)
             if created :
                 public_user.set_password('public')
+                g_public.user_set.add(public_user)
                 public_user.save()
             consumer_anonyme_user, created = User.objects.get_or_create(username='consumer_anonyme', is_active=True)
             if created :
