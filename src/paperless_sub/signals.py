@@ -27,7 +27,9 @@ from django.contrib.contenttypes.models import ContentType
 from paperless_sub.checks import check_dates_conformity, check_doc_type_conformity, check_correspondent_not_null, check_documenttype_not_null
 from documents.permissions import get_objects_for_user_owner_aware
 from documents.permissions import set_permissions_for_object
-from paperless_sub.checks import CheckPublish
+from rest_framework.exceptions import ValidationError
+from paperless_sub.checks import test_message
+
 
 logger = logging.getLogger("paperless.handlers")
 
@@ -154,10 +156,19 @@ def mon_recepteur(sender, **kwargs):
         print(f"Document mis à jour : {doc.id} {doc.title} {doc.archive_path}")
 
         # Document mis à jour et publier à vrai        
-        if cf_doc.value_bool == True:    
+        if cf_doc.value_bool == True:
+            #raise ValidationError("Condition non remplie.")
+
             print(f"traitement de la publication pour {doc.id} {doc.archive_path}")
             try:
-                if check_dates_conformity(doc.id) and check_doc_type_conformity(doc.id) and check_correspondent_not_null(doc.id) and check_documenttype_not_null(doc.id) and "Archive" not in current_tags and "En ligne" not in current_tags :
+
+                if (check_dates_conformity(doc.id) 
+                    and check_doc_type_conformity(doc.id) 
+                    and check_correspondent_not_null(doc.id) 
+                    and check_documenttype_not_null(doc.id) 
+                    and "Archive" not in current_tags 
+                    and "En ligne" not in current_tags ):
+
                     mySignTest=SignDocument()
                     doc.checksum = hashlib.md5(doc.archive_path.read_bytes()).hexdigest()
 
@@ -222,6 +233,9 @@ def mon_recepteur(sender, **kwargs):
                         #update_document_archive_file.apply_async([doc.id], priority=0)
                         #bulk_update_documents.delay(doc.id)
                         
+            except ValidationError as e:
+                # Vous pouvez gérer l'erreur ici ou la laisser remonter
+                raise e  # Propagation de l'exception
 
             except Exception as e:
                 logger.exception(f"Error on trying add watermark on {doc.id} :{e}")
